@@ -48,26 +48,74 @@ export const useContactUpdates = () => {
       console.log('Contact updated successfully:', data);
       return data;
     },
-    onSuccess: (data) => {
-      console.log('Update mutation success:', data);
-      queryClient.invalidateQueries({ queryKey: ['contacts'] });
-      toast({
-        title: "Contact updated",
-        description: "Contact information has been updated successfully."
+    onMutate: async ({ contactId, updates }) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ['contacts'] });
+
+      // Snapshot the previous value
+      const previousContacts = queryClient.getQueryData(['contacts']);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(['contacts'], (old: Contact[] | undefined) => {
+        if (!old) return old;
+        return old.map(contact => 
+          contact.id === contactId 
+            ? { ...contact, ...updates }
+            : contact
+        );
       });
+
+      // Return a context object with the snapshotted value
+      return { previousContacts };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
       console.error('Update mutation error:', error);
+      
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousContacts) {
+        queryClient.setQueryData(['contacts'], context.previousContacts);
+      }
+      
       toast({
         title: "Error updating contact",
         description: "There was an error updating the contact. Please try again.",
         variant: "destructive"
       });
+    },
+    onSuccess: (data) => {
+      console.log('Update mutation success:', data);
+      
+      // Update the cache with the actual response from the server
+      queryClient.setQueryData(['contacts'], (old: Contact[] | undefined) => {
+        if (!old) return old;
+        return old.map(contact => 
+          contact.id === data.id 
+            ? {
+                ...contact,
+                firstName: data.first_name,
+                lastName: data.last_name,
+                phone: data.phone,
+                email: data.email,
+                comments: data.comments,
+                attending: data.attending
+              }
+            : contact
+        );
+      });
+      
+      toast({
+        title: "Contact updated",
+        description: "Contact information has been updated successfully."
+      });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
     }
   });
 
   const handleAttendanceChange = (contact: Contact, checked: boolean) => {
-    console.log('Attendance change:', contact.id, checked);
+    console.log('Attendance change:', contact.id, checked, 'for contact:', contact.firstName);
     const attending = checked ? "yes" : "no";
     updateContactMutation.mutate({
       contactId: contact.id,
@@ -76,7 +124,7 @@ export const useContactUpdates = () => {
   };
 
   const handleCommentsChange = (contact: Contact, comments: string) => {
-    console.log('Comments change:', contact.id, comments);
+    console.log('Comments change:', contact.id, comments, 'for contact:', contact.firstName);
     updateContactMutation.mutate({
       contactId: contact.id,
       updates: { comments }

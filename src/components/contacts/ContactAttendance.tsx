@@ -25,7 +25,8 @@ const ContactAttendance = ({
   console.log('ContactAttendance render:', {
     contactId: contact.id,
     attending: contact.attending,
-    comments: contact.comments
+    comments: contact.comments,
+    firstName: contact.firstName
   });
 
   return (
