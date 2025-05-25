@@ -32,7 +32,7 @@ const ContactsTable = ({ contacts, onCall, onAttendingChange, onCommentsChange }
                 STATUS
               </th>
               <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                ATTENDANCE
+                COMMENTS
               </th>
               <th className="px-6 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
                 ACTIONS
