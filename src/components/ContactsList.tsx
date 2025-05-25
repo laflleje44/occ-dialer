@@ -67,6 +67,13 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
     const matchesFilter = filterAttending === "all" || contact.attending === filterAttending;
 
     return matchesSearch && matchesFilter;
+  }).sort((a, b) => {
+    // Sort by first name first, then by last name
+    const firstNameComparison = a.firstName.localeCompare(b.firstName);
+    if (firstNameComparison !== 0) {
+      return firstNameComparison;
+    }
+    return a.lastName.localeCompare(b.lastName);
   });
 
   const handleCall = (contact: Contact) => {
