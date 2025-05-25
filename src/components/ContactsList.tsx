@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,8 +42,9 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
 
   const maskPhoneNumber = (phone: string) => {
     if (!phone || phone.length < 4) return phone;
-    const visiblePart = phone.slice(0, -4);
-    return visiblePart + '****';
+    const lastFour = phone.slice(-4);
+    const maskedPart = '*'.repeat(phone.length - 4);
+    return maskedPart + lastFour;
   };
 
   if (contacts.length === 0) {
