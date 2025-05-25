@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone } from "lucide-react";
+import { Phone, MessageSquare } from "lucide-react";
 import { Contact } from "@/types/auth";
 import { useState } from "react";
 
@@ -33,6 +33,10 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
       e.preventDefault();
       onCommentsChange(contact.id, localComments);
     }
+  };
+
+  const handleText = (contact: Contact) => {
+    console.log(`Sending text to: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
   };
 
   return (
@@ -87,14 +91,24 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right">
-        <Button
-          size="sm"
-          onClick={() => onCall(contact)}
-          className="bg-green-500 hover:bg-green-600 text-white"
-        >
-          <Phone className="w-4 h-4 mr-2" />
-          Call
-        </Button>
+        <div className="flex gap-2 justify-end">
+          <Button
+            size="sm"
+            onClick={() => handleText(contact)}
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Text
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => onCall(contact)}
+            className="bg-green-500 hover:bg-green-600 text-white"
+          >
+            <Phone className="w-4 h-4 mr-2" />
+            Call
+          </Button>
+        </div>
       </td>
     </tr>
   );
