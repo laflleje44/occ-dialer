@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,22 +9,31 @@ import UploadContacts from "@/components/UploadContacts";
 import ContactsList from "@/components/ContactsList";
 import { Contact } from "@/types/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useCallSessions } from "@/hooks/useCallSessions";
 
 const Index = () => {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("upload");
+  const [selectedCallSessionId, setSelectedCallSessionId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { updateCallSessionContactCount } = useCallSessions();
 
   const { data: contacts = [] } = useQuery({
-    queryKey: ['contacts'],
+    queryKey: ['contacts', selectedCallSessionId],
     queryFn: async () => {
       if (!user?.id) return [];
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('contacts')
         .select('*')
         .eq('user_id', user.id);
+      
+      if (selectedCallSessionId) {
+        query = query.eq('call_session_id', selectedCallSessionId);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
       
@@ -38,7 +48,7 @@ const Index = () => {
   });
 
   const saveContactsMutation = useMutation({
-    mutationFn: async (newContacts: Contact[]) => {
+    mutationFn: async ({ newContacts, callSessionId }: { newContacts: Contact[], callSessionId: string }) => {
       if (!user?.id) throw new Error('User not authenticated');
       
       const contactsForDatabase = newContacts.map(contact => ({
@@ -48,7 +58,8 @@ const Index = () => {
         phone: contact.phone,
         email: contact.email,
         comments: contact.comments,
-        attending: contact.attending
+        attending: contact.attending,
+        call_session_id: callSessionId
       }));
 
       const { error } = await supabase
@@ -56,6 +67,12 @@ const Index = () => {
         .insert(contactsForDatabase);
       
       if (error) throw error;
+
+      // Update call session contact count
+      updateCallSessionContactCount({ 
+        sessionId: callSessionId, 
+        contactCount: newContacts.length 
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
@@ -74,8 +91,8 @@ const Index = () => {
     }
   });
 
-  const handleContactsImported = (importedContacts: Contact[]) => {
-    saveContactsMutation.mutate(importedContacts);
+  const handleContactsImported = (importedContacts: Contact[], callSessionId: string) => {
+    saveContactsMutation.mutate({ newContacts: importedContacts, callSessionId });
     setActiveTab("dialer");
   };
 
@@ -96,7 +113,13 @@ const Index = () => {
       case "upload":
         return <UploadContacts onContactsImported={handleContactsImported} />;
       case "dialer":
-        return <ContactsList contacts={contacts} />;
+        return (
+          <ContactsList 
+            contacts={contacts} 
+            selectedCallSessionId={selectedCallSessionId}
+            onCallSessionChange={setSelectedCallSessionId}
+          />
+        );
       default:
         return <UploadContacts onContactsImported={handleContactsImported} />;
     }

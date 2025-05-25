@@ -1,18 +1,23 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { File } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact } from "@/types/auth";
+import { useCallSessions } from "@/hooks/useCallSessions";
 
 interface UploadContactsProps {
-  onContactsImported: (contacts: Contact[]) => void;
+  onContactsImported: (contacts: Contact[], callSessionId: string) => void;
 }
 
 const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [callSessionName, setCallSessionName] = useState("");
+  const [parsedContacts, setParsedContacts] = useState<Contact[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { createCallSession, isCreating } = useCallSessions();
 
   const parseCSV = (text: string): Contact[] => {
     const lines = text.split('\n').filter(line => line.trim());
@@ -67,10 +72,11 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
           return;
         }
         
-        onContactsImported(contacts);
+        setParsedContacts(contacts);
+        setCallSessionName(file.name.replace('.csv', ''));
         toast({
-          title: "Contacts imported successfully",
-          description: `${contacts.length} contacts have been imported.`
+          title: "File parsed successfully",
+          description: `${contacts.length} contacts found. Please enter a call session name and upload.`
         });
       } catch (error) {
         toast({
@@ -81,6 +87,34 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
       }
     };
     reader.readAsText(file);
+  };
+
+  const handleUpload = () => {
+    if (!callSessionName.trim()) {
+      toast({
+        title: "Call session name required",
+        description: "Please enter a name for this call session.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (parsedContacts.length === 0) {
+      toast({
+        title: "No contacts to upload",
+        description: "Please select a CSV file first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    createCallSession(callSessionName.trim(), {
+      onSuccess: (callSession) => {
+        onContactsImported(parsedContacts, callSession.id);
+        setParsedContacts([]);
+        setCallSessionName("");
+      }
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -147,11 +181,33 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
         className="hidden"
       />
 
-      <div className="flex justify-end items-center mt-8">
-        <Button className="bg-green-600 hover:bg-green-700">
-          Upload Contacts
-        </Button>
-      </div>
+      {parsedContacts.length > 0 && (
+        <div className="mt-8 p-6 bg-gray-50 rounded-lg">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            Ready to Upload {parsedContacts.length} Contacts
+          </h3>
+          <div className="mb-4">
+            <label htmlFor="session-name" className="block text-sm font-medium text-gray-700 mb-2">
+              Call Session Name
+            </label>
+            <Input
+              id="session-name"
+              type="text"
+              value={callSessionName}
+              onChange={(e) => setCallSessionName(e.target.value)}
+              placeholder="Enter a name for this call session"
+              className="max-w-md"
+            />
+          </div>
+          <Button 
+            onClick={handleUpload}
+            disabled={isCreating || !callSessionName.trim()}
+            className="bg-green-600 hover:bg-green-700"
+          >
+            {isCreating ? "Creating..." : "Create Call Session & Upload Contacts"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
