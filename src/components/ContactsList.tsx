@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Phone, Users, Search, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact } from "@/types/auth";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContactsListProps {
   contacts: Contact[];
@@ -16,6 +18,29 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAttending, setFilterAttending] = useState<"all" | "yes" | "no">("all");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const updateContactMutation = useMutation({
+    mutationFn: async ({ contactId, updates }: { contactId: string, updates: Partial<Contact> }) => {
+      const { error } = await supabase
+        .from('contacts')
+        .update(updates)
+        .eq('id', contactId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error updating contact",
+        description: "There was an error updating the contact. Please try again.",
+        variant: "destructive"
+      });
+      console.error('Error updating contact:', error);
+    }
+  });
 
   const filteredContacts = contacts.filter(contact => {
     const matchesSearch = 
@@ -43,6 +68,21 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
       description: `Texting ${contact.firstName} ${contact.lastName} at ${contact.phone}`
     });
     console.log(`Texting: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
+  };
+
+  const handleAttendanceChange = (contact: Contact, checked: boolean) => {
+    const attending = checked ? "yes" : "no";
+    updateContactMutation.mutate({
+      contactId: contact.id,
+      updates: { attending }
+    });
+  };
+
+  const handleCommentsChange = (contact: Contact, comments: string) => {
+    updateContactMutation.mutate({
+      contactId: contact.id,
+      updates: { comments }
+    });
   };
 
   const maskLastName = (lastName: string) => {
@@ -144,7 +184,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                         <Checkbox 
                           id={`attend-${contact.id}`}
                           checked={contact.attending === "yes"}
-                          disabled
+                          onCheckedChange={(checked) => handleAttendanceChange(contact, checked as boolean)}
                         />
                         <label 
                           htmlFor={`attend-${contact.id}`}
@@ -157,8 +197,8 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                         <Textarea
                           placeholder="Add comments"
                           value={contact.comments || ""}
+                          onChange={(e) => handleCommentsChange(contact, e.target.value)}
                           className="min-h-[60px] text-sm"
-                          readOnly
                         />
                       </div>
                     </div>
