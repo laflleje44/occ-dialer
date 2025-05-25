@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Phone, Users } from "lucide-react";
+import { Phone, Users, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact } from "@/types/auth";
 
@@ -50,69 +50,35 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Dialer</h2>
-        <p className="text-gray-600">
-          {contacts.length} contacts imported. Click the call button to dial any contact.
-        </p>
-      </div>
-
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
+      <div className="mb-8 flex items-center justify-between">
+        <h2 className="text-2xl font-semibold text-gray-900">Contact List</h2>
+        <div className="relative w-80">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
-            placeholder="Search contacts by name, phone, or email..."
+            placeholder="Search contacts..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full"
+            className="pl-10"
           />
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant={filterAttending === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilterAttending("all")}
-          >
-            All
-          </Button>
-          <Button
-            variant={filterAttending === "yes" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilterAttending("yes")}
-          >
-            Attending
-          </Button>
-          <Button
-            variant={filterAttending === "no" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilterAttending("no")}
-          >
-            Not Attending
-          </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full">
+            <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  NAME
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  LAST CALLED
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  STATUS
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Attending
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Comments
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                <th className="px-6 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  ACTIONS
                 </th>
               </tr>
             </thead>
@@ -125,26 +91,18 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{contact.phone}</div>
+                    <div className="text-sm text-gray-500">Never</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{contact.email}</div>
+                    <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">
+                      Not Called
+                    </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Badge variant={contact.attending === "yes" ? "default" : "secondary"}>
-                      {contact.attending === "yes" ? "Yes" : "No"}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900 max-w-xs truncate">
-                      {contact.comments || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
                     <Button
                       size="sm"
                       onClick={() => handleCall(contact)}
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-green-500 hover:bg-green-600 text-white"
                     >
                       <Phone className="w-4 h-4 mr-2" />
                       Call
