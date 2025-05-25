@@ -17,7 +17,7 @@ const ContactAttendance = ({
 }: ContactAttendanceProps) => {
   const [localComments, setLocalComments] = useState(contact.comments || "");
 
-  // Use useEffect to sync with prop changes instead of doing it during render
+  // Sync local state with prop changes for this specific contact
   useEffect(() => {
     setLocalComments(contact.comments || "");
   }, [contact.comments]);
@@ -29,15 +29,17 @@ const ContactAttendance = ({
   const handleCommentsKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      console.log('Enter pressed - saving comments for contact:', contact.id);
       onCommentsChange(contact, localComments);
     }
   };
 
   const handleAttendanceChange = (checked: boolean | string) => {
+    console.log('Checkbox clicked for contact:', contact.id, 'new state:', checked);
     onAttendanceChange(contact, checked as boolean);
   };
 
-  console.log('ContactAttendance render:', {
+  console.log('ContactAttendance render for contact:', {
     contactId: contact.id,
     attending: contact.attending,
     comments: contact.comments,

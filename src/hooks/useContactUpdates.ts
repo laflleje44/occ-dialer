@@ -55,7 +55,7 @@ export const useContactUpdates = () => {
       // Snapshot the previous value
       const previousContacts = queryClient.getQueryData(['contacts']);
 
-      // Optimistically update to the new value
+      // Optimistically update to the new value for this specific contact only
       queryClient.setQueryData(['contacts'], (old: Contact[] | undefined) => {
         if (!old) return old;
         return old.map(contact => 
@@ -85,7 +85,7 @@ export const useContactUpdates = () => {
     onSuccess: (data) => {
       console.log('Update mutation success:', data);
       
-      // Update the cache with the actual response from the server
+      // Update the cache with the actual response from the server for this specific contact
       queryClient.setQueryData(['contacts'], (old: Contact[] | undefined) => {
         if (!old) return old;
         return old.map(contact => 
@@ -110,7 +110,7 @@ export const useContactUpdates = () => {
   });
 
   const handleAttendanceChange = (contact: Contact, checked: boolean) => {
-    console.log('Attendance change:', contact.id, checked, 'for contact:', contact.firstName);
+    console.log('Attendance change for contact ID:', contact.id, 'checked:', checked, 'contact:', contact.firstName);
     const attending = checked ? "yes" : "no";
     updateContactMutation.mutate({
       contactId: contact.id,
@@ -119,7 +119,7 @@ export const useContactUpdates = () => {
   };
 
   const handleCommentsChange = (contact: Contact, comments: string) => {
-    console.log('Comments change:', contact.id, comments, 'for contact:', contact.firstName);
+    console.log('Comments change for contact ID:', contact.id, 'comments:', comments, 'contact:', contact.firstName);
     updateContactMutation.mutate({
       contactId: contact.id,
       updates: { comments }
