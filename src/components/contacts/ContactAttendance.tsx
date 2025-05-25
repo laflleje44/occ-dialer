@@ -14,17 +14,31 @@ const ContactAttendance = ({
   onAttendanceChange, 
   onCommentsChange 
 }: ContactAttendanceProps) => {
+  const handleCommentsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onCommentsChange(contact, e.target.value);
+  };
+
+  const handleAttendanceChange = (checked: boolean | string) => {
+    onAttendanceChange(contact, checked as boolean);
+  };
+
+  console.log('ContactAttendance render:', {
+    contactId: contact.id,
+    attending: contact.attending,
+    comments: contact.comments
+  });
+
   return (
     <div className="space-y-3">
       <div className="flex items-center space-x-2">
         <Checkbox 
           id={`attend-${contact.id}`}
           checked={contact.attending === "yes"}
-          onCheckedChange={(checked) => onAttendanceChange(contact, checked as boolean)}
+          onCheckedChange={handleAttendanceChange}
         />
         <label 
           htmlFor={`attend-${contact.id}`}
-          className="text-sm text-gray-700"
+          className="text-sm text-gray-700 cursor-pointer"
         >
           Confirmed to attend
         </label>
@@ -33,7 +47,7 @@ const ContactAttendance = ({
         <Textarea
           placeholder="Add comments"
           value={contact.comments || ""}
-          onChange={(e) => onCommentsChange(contact, e.target.value)}
+          onChange={handleCommentsChange}
           className="min-h-[60px] text-sm"
         />
       </div>
