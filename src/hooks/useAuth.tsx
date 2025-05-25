@@ -21,28 +21,57 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    if (data) {
-      setUser({
-        id: data.id,
-        email: data.email,
-        first_name: data.first_name,
-        last_name: data.last_name,
-        role: (data.role === 'admin' ? 'admin' : 'user') as 'user' | 'admin'
-      });
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error) {
+        setUser({
+          id: data.id,
+          email: data.email || '',
+          first_name: data.first_name,
+          last_name: data.last_name,
+          role: (data.role === 'admin' ? 'admin' : 'user') as 'user' | 'admin'
+        });
+      } else {
+        // If profile doesn't exist or there's an error, create a basic user object from session
+        console.log('Profile fetch error:', error);
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            first_name: session.user.user_metadata?.first_name,
+            last_name: session.user.user_metadata?.last_name,
+            role: 'user'
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      // Fallback to session user data
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          first_name: session.user.user_metadata?.first_name,
+          last_name: session.user.user_metadata?.last_name,
+          role: 'user'
+        });
+      }
     }
   };
 
   useEffect(() => {
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
         if (session?.user) {
+          // Use setTimeout to avoid infinite recursion
           setTimeout(() => {
             fetchProfile(session.user.id);
           }, 0);
@@ -53,7 +82,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     );
 
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id);
       setSession(session);
       if (session?.user) {
         fetchProfile(session.user.id);

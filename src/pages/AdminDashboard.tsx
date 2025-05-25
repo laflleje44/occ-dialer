@@ -39,8 +39,12 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  if (user.role !== 'admin') {
+    return <Navigate to="/" replace />;
   }
 
   return (

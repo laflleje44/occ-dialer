@@ -19,10 +19,12 @@ const Index = () => {
   const { data: contacts = [] } = useQuery({
     queryKey: ['contacts'],
     queryFn: async () => {
+      if (!user?.id) return [];
+      
       const { data, error } = await supabase
         .from('contacts')
         .select('*')
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
       
       if (error) throw error;
       
@@ -38,9 +40,11 @@ const Index = () => {
 
   const saveContactsMutation = useMutation({
     mutationFn: async (newContacts: Contact[]) => {
+      if (!user?.id) throw new Error('User not authenticated');
+      
       const contactsWithUserId = newContacts.map(contact => ({
         ...contact,
-        user_id: user?.id,
+        user_id: user.id,
         last_name: contact.lastName,
         first_name: contact.firstName
       }));
