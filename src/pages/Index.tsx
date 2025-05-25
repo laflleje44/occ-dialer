@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,7 +10,6 @@ import ContactsList from "@/components/ContactsList";
 import { Contact } from "@/types/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useCallSessions } from "@/hooks/useCallSessions";
-import RingCentralAuth from "@/components/RingCentralAuth";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -114,16 +114,11 @@ const Index = () => {
         return <UploadContacts onContactsImported={handleContactsImported} />;
       case "dialer":
         return (
-          <div className="space-y-6">
-            <div className="flex justify-center">
-              <RingCentralAuth />
-            </div>
-            <ContactsList 
-              contacts={contacts} 
-              selectedCallSessionId={selectedCallSessionId}
-              onCallSessionChange={setSelectedCallSessionId}
-            />
-          </div>
+          <ContactsList 
+            contacts={contacts} 
+            selectedCallSessionId={selectedCallSessionId}
+            onCallSessionChange={setSelectedCallSessionId}
+          />
         );
       default:
         return <UploadContacts onContactsImported={handleContactsImported} />;
