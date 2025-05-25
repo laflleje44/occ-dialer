@@ -36,6 +36,17 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
     console.log(`Dialing: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
   };
 
+  const maskLastName = (lastName: string) => {
+    if (!lastName) return '';
+    return lastName.charAt(0) + '*'.repeat(lastName.length - 1);
+  };
+
+  const maskPhoneNumber = (phone: string) => {
+    if (!phone || phone.length < 4) return phone;
+    const visiblePart = phone.slice(0, -4);
+    return visiblePart + '****';
+  };
+
   if (contacts.length === 0) {
     return (
       <div className="max-w-4xl mx-auto text-center py-12">
@@ -69,7 +80,13 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                  NAME
+                  FIRST NAME
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  LAST NAME
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  PHONE NUMBER
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   LAST CALLED
@@ -87,7 +104,17 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                 <tr key={contact.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {contact.firstName} {contact.lastName}
+                      {contact.firstName}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {maskLastName(contact.lastName)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {maskPhoneNumber(contact.phone)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
