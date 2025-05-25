@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +22,8 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
 
   const updateContactMutation = useMutation({
     mutationFn: async ({ contactId, updates }: { contactId: string; updates: Partial<Contact> }) => {
+      console.log('Updating contact:', contactId, 'with updates:', updates);
+      
       const { error } = await supabase
         .from('contacts')
         .update({
@@ -32,10 +33,19 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
         })
         .eq('id', contactId);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+      
+      console.log('Contact updated successfully');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      toast({
+        title: "Contact updated",
+        description: "Contact information has been saved successfully."
+      });
     },
     onError: (error) => {
       toast({
@@ -67,8 +77,12 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
     console.log(`Dialing: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
   };
 
-  const handleAttendingChange = (contact: Contact, attending: boolean) => {
-    const newAttending = attending ? "yes" : "no";
+  const handleAttendingChange = (contact: Contact, checked: boolean | string) => {
+    console.log('Checkbox changed for contact:', contact.id, 'checked:', checked);
+    
+    const newAttending = checked === true ? "yes" : "no";
+    console.log('Setting attending to:', newAttending);
+    
     updateContactMutation.mutate({
       contactId: contact.id,
       updates: { attending: newAttending }
@@ -76,6 +90,8 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
   };
 
   const handleCommentsChange = (contact: Contact, comments: string) => {
+    console.log('Comments changed for contact:', contact.id, 'comments:', comments);
+    
     updateContactMutation.mutate({
       contactId: contact.id,
       updates: { comments }
@@ -181,7 +197,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                         <Checkbox 
                           id={`attend-${contact.id}`}
                           checked={contact.attending === "yes"}
-                          onCheckedChange={(checked) => handleAttendingChange(contact, checked as boolean)}
+                          onCheckedChange={(checked) => handleAttendingChange(contact, checked)}
                         />
                         <label 
                           htmlFor={`attend-${contact.id}`}
