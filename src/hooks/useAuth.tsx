@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -29,6 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
       
       if (data && !error) {
+        console.log('Profile data found:', data);
         setUser({
           id: data.id,
           email: data.email || '',
@@ -37,20 +39,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           role: data.role as 'user' | 'admin'
         });
       } else {
-        console.log('Profile fetch error, using fallback:', error);
-        // Always create a fallback user to avoid being stuck in loading
+        console.log('No profile found, creating from session data');
+        // If no profile exists, create one from session data
         if (session?.user) {
-          setUser({
+          const newProfile = {
             id: session.user.id,
             email: session.user.email || '',
-            first_name: session.user.user_metadata?.first_name,
-            last_name: session.user.user_metadata?.last_name,
-            role: 'user'
-          });
+            first_name: session.user.user_metadata?.first_name || null,
+            last_name: session.user.user_metadata?.last_name || null,
+            role: 'user' as const
+          };
+          
+          // Try to insert the new profile
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert(newProfile);
+          
+          if (!insertError) {
+            console.log('New profile created successfully');
+          }
+          
+          // Set user regardless of insert success/failure
+          setUser(newProfile);
         }
       }
     } catch (error) {
-      console.error('Error fetching profile, using fallback:', error);
+      console.error('Error in fetchProfile:', error);
       // Always create a fallback user to avoid being stuck in loading
       if (session?.user) {
         setUser({
@@ -71,18 +85,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       
-      console.log('Initial session:', session?.user?.id);
+      console.log('Initial session check:', session?.user?.id);
       setSession(session);
       
       if (session?.user) {
-        // Use setTimeout to avoid blocking and prevent deadlocks
-        setTimeout(() => {
-          if (mounted) {
-            fetchProfile(session.user.id).finally(() => {
-              if (mounted) setLoading(false);
-            });
-          }
-        }, 0);
+        fetchProfile(session.user.id).finally(() => {
+          if (mounted) setLoading(false);
+        });
       } else {
         setUser(null);
         setLoading(false);
@@ -98,14 +107,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         
         if (session?.user) {
-          // Use setTimeout to defer Supabase calls and prevent deadlocks
-          setTimeout(() => {
-            if (mounted) {
-              fetchProfile(session.user.id).finally(() => {
-                if (mounted) setLoading(false);
-              });
-            }
-          }, 0);
+          fetchProfile(session.user.id).finally(() => {
+            if (mounted) setLoading(false);
+          });
         } else {
           setUser(null);
           setLoading(false);
@@ -120,6 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    console.log('Attempting sign in for:', email);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -128,6 +133,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
+    console.log('Attempting sign up for:', email);
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -142,6 +148,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOut = async () => {
+    console.log('Signing out');
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
