@@ -1,13 +1,30 @@
 
-import { Phone, Upload, Users, FileText } from "lucide-react";
+import { Phone, Upload, Users, FileText, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  isAdmin?: boolean;
 }
 
-const Header = ({ activeTab, setActiveTab }: HeaderProps) => {
+const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  const handleAdminClick = () => {
+    if (user?.role === 'admin') {
+      navigate('/admin');
+    }
+  };
+
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4">
@@ -17,7 +34,7 @@ const Header = ({ activeTab, setActiveTab }: HeaderProps) => {
               <Phone className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900">Secure Call Manager</h1>
+              <h1 className="text-xl font-semibold text-gray-900">OCC Secure Dialer</h1>
               <p className="text-sm text-gray-600">Privacy-focused calling solution</p>
             </div>
           </div>
@@ -26,44 +43,62 @@ const Header = ({ activeTab, setActiveTab }: HeaderProps) => {
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-sm text-gray-600">System Ready</span>
             </div>
-            <Button variant="outline" size="sm">Admin</Button>
+            {user && (
+              <span className="text-sm text-gray-600">
+                Welcome, {user.first_name || user.email}
+              </span>
+            )}
+            {user?.role === 'admin' && !isAdmin && (
+              <Button variant="outline" size="sm" onClick={handleAdminClick}>
+                Admin
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </div>
         
         <nav className="flex space-x-0 border-b">
-          <button
-            onClick={() => setActiveTab("upload")}
-            className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
-              activeTab === "upload"
-                ? "border-green-500 text-green-600 bg-green-50"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <Upload className="w-4 h-4" />
-            <span>Upload Contacts</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("contacts")}
-            className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
-              activeTab === "contacts"
-                ? "border-green-500 text-green-600 bg-green-50"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Contacts</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("reports")}
-            className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
-              activeTab === "reports"
-                ? "border-green-500 text-green-600 bg-green-50"
-                : "border-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>Reports</span>
-          </button>
+          {isAdmin ? (
+            <button
+              onClick={() => setActiveTab("reports")}
+              className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
+                activeTab === "reports"
+                  ? "border-green-500 text-green-600 bg-green-50"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Reports</span>
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setActiveTab("upload")}
+                className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
+                  activeTab === "upload"
+                    ? "border-green-500 text-green-600 bg-green-50"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+                <span>Upload Contacts</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("dialer")}
+                className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
+                  activeTab === "dialer"
+                    ? "border-green-500 text-green-600 bg-green-50"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                <span>Dialer</span>
+              </button>
+            </>
+          )}
         </nav>
       </div>
     </header>

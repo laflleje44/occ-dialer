@@ -1,8 +1,9 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { File } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Contact } from "@/pages/Index";
+import { Contact } from "@/types/auth";
 
 interface UploadContactsProps {
   onContactsImported: (contacts: Contact[]) => void;
@@ -25,6 +26,7 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
       
       const contact: Contact = {
         id: crypto.randomUUID(),
+        user_id: '', // Will be set when saving to database
         lastName: values[headers.indexOf('last name')] || values[headers.indexOf('lastname')] || '',
         firstName: values[headers.indexOf('name')] || values[headers.indexOf('first name')] || values[headers.indexOf('firstname')] || '',
         phone: values[headers.indexOf('phone')] || '',
@@ -98,44 +100,6 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
     }
   };
 
-  const loadDemoData = () => {
-    const demoContacts: Contact[] = [
-      {
-        id: "1",
-        lastName: "Smith",
-        firstName: "John",
-        phone: "+1 555-0101",
-        email: "john.smith@email.com",
-        comments: "Prefers morning calls",
-        attending: "yes"
-      },
-      {
-        id: "2",
-        lastName: "Johnson",
-        firstName: "Sarah",
-        phone: "+1 555-0102",
-        email: "sarah.j@email.com",
-        comments: "Decision maker",
-        attending: "no"
-      },
-      {
-        id: "3",
-        lastName: "Williams",
-        firstName: "Mike",
-        phone: "+1 555-0103",
-        email: "mike.w@email.com",
-        comments: "Follow up needed",
-        attending: "yes"
-      }
-    ];
-    
-    onContactsImported(demoContacts);
-    toast({
-      title: "Demo data loaded",
-      description: "3 sample contacts have been loaded for testing."
-    });
-  };
-
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -183,14 +147,7 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
         className="hidden"
       />
 
-      <div className="flex justify-between items-center mt-8">
-        <Button
-          onClick={loadDemoData}
-          variant="outline"
-          className="text-blue-600 border-blue-200 hover:bg-blue-50"
-        >
-          Load Demo Data
-        </Button>
+      <div className="flex justify-end items-center mt-8">
         <Button className="bg-green-600 hover:bg-green-700">
           Upload Contacts
         </Button>

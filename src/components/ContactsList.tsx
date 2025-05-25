@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Contact } from "@/pages/Index";
+import { Contact } from "@/types/auth";
 
 interface ContactsListProps {
   contacts: Contact[];
@@ -29,7 +29,6 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
   });
 
   const handleCall = (contact: Contact) => {
-    // In a real app, this would integrate with a calling service
     toast({
       title: "Initiating call",
       description: `Calling ${contact.firstName} ${contact.lastName} at ${contact.phone}`
@@ -52,7 +51,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Contacts</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Dialer</h2>
         <p className="text-gray-600">
           {contacts.length} contacts imported. Click the call button to dial any contact.
         </p>
