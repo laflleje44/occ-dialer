@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { phone } from "lucide-react";
+import { Phone, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact } from "@/pages/Index";
 
@@ -41,7 +41,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
     return (
       <div className="max-w-4xl mx-auto text-center py-12">
         <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-          <contacts className="w-8 h-8 text-gray-400" />
+          <Users className="w-8 h-8 text-gray-400" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No contacts imported</h3>
         <p className="text-gray-500 mb-4">Upload a CSV file in the Upload Contacts tab to get started.</p>
@@ -147,7 +147,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                       onClick={() => handleCall(contact)}
                       className="bg-green-600 hover:bg-green-700"
                     >
-                      <phone className="w-4 h-4 mr-2" />
+                      <Phone className="w-4 h-4 mr-2" />
                       Call
                     </Button>
                   </td>

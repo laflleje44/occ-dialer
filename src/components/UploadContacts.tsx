@@ -1,7 +1,6 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { file } from "lucide-react";
+import { File } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact } from "@/pages/Index";
 
@@ -161,7 +160,7 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
       >
         <div className="flex flex-col items-center space-y-4">
           <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-            <file className="w-8 h-8 text-gray-400" />
+            <File className="w-8 h-8 text-gray-400" />
           </div>
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Upload CSV File</h3>

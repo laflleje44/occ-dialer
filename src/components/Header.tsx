@@ -1,5 +1,5 @@
 
-import { upload, contacts, report } from "lucide-react";
+import { Phone, Upload, Users, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
@@ -14,7 +14,7 @@ const Header = ({ activeTab, setActiveTab }: HeaderProps) => {
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-              <phone className="w-5 h-5 text-white" />
+              <Phone className="w-5 h-5 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">Secure Call Manager</h1>
@@ -39,7 +39,7 @@ const Header = ({ activeTab, setActiveTab }: HeaderProps) => {
                 : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
           >
-            <upload className="w-4 h-4" />
+            <Upload className="w-4 h-4" />
             <span>Upload Contacts</span>
           </button>
           <button
@@ -50,7 +50,7 @@ const Header = ({ activeTab, setActiveTab }: HeaderProps) => {
                 : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
           >
-            <contacts className="w-4 h-4" />
+            <Users className="w-4 h-4" />
             <span>Contacts</span>
           </button>
           <button
@@ -61,7 +61,7 @@ const Header = ({ activeTab, setActiveTab }: HeaderProps) => {
                 : "border-transparent text-gray-600 hover:text-gray-900"
             }`}
           >
-            <report className="w-4 h-4" />
+            <FileText className="w-4 h-4" />
             <span>Reports</span>
           </button>
         </nav>
