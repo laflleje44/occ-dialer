@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { File } from "lucide-react";
@@ -21,19 +20,55 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
     const contacts: Contact[] = [];
 
+    console.log('CSV Headers found:', headers);
+
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',').map(v => v.trim());
       
+      // More flexible header matching for last name
+      const lastNameIndex = headers.findIndex(h => 
+        h.includes('last') && h.includes('name') || 
+        h === 'lastname' || 
+        h === 'surname' ||
+        h === 'family name'
+      );
+      
+      // More flexible header matching for first name
+      const firstNameIndex = headers.findIndex(h => 
+        (h.includes('first') && h.includes('name')) || 
+        h === 'firstname' || 
+        h === 'name' ||
+        h === 'given name'
+      );
+      
+      const phoneIndex = headers.findIndex(h => 
+        h.includes('phone') || h.includes('mobile') || h.includes('tel')
+      );
+      
+      const emailIndex = headers.findIndex(h => 
+        h.includes('email') || h.includes('mail')
+      );
+      
+      const commentsIndex = headers.findIndex(h => 
+        h.includes('comment') || h.includes('note')
+      );
+      
+      const attendingIndex = headers.findIndex(h => 
+        h.includes('attend')
+      );
+
       const contact: Contact = {
         id: crypto.randomUUID(),
         user_id: '', // Will be set when saving to database
-        lastName: values[headers.indexOf('last name')] || values[headers.indexOf('lastname')] || '',
-        firstName: values[headers.indexOf('name')] || values[headers.indexOf('first name')] || values[headers.indexOf('firstname')] || '',
-        phone: values[headers.indexOf('phone')] || '',
-        email: values[headers.indexOf('email')] || '',
-        comments: values[headers.indexOf('comments')] || '',
-        attending: (values[headers.indexOf('attending')] || 'no').toLowerCase() === 'yes' ? 'yes' : 'no'
+        lastName: lastNameIndex >= 0 ? (values[lastNameIndex] || '') : '',
+        firstName: firstNameIndex >= 0 ? (values[firstNameIndex] || '') : '',
+        phone: phoneIndex >= 0 ? (values[phoneIndex] || '') : '',
+        email: emailIndex >= 0 ? (values[emailIndex] || '') : '',
+        comments: commentsIndex >= 0 ? (values[commentsIndex] || '') : '',
+        attending: attendingIndex >= 0 && (values[attendingIndex] || '').toLowerCase() === 'yes' ? 'yes' : 'no'
       };
+
+      console.log('Parsed contact:', contact);
 
       if (contact.phone) {
         contacts.push(contact);
