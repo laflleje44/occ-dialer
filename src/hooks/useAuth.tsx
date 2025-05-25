@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email: data.email,
         first_name: data.first_name,
         last_name: data.last_name,
-        role: data.role
+        role: (data.role === 'admin' ? 'admin' : 'user') as 'user' | 'admin'
       });
     }
   };

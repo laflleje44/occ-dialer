@@ -1,5 +1,5 @@
 
-import { Contact } from "@/pages/Index";
+import { Contact } from "@/types/auth";
 import { Badge } from "@/components/ui/badge";
 
 interface ReportsProps {

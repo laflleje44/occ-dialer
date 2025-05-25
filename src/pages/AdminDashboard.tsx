@@ -20,7 +20,13 @@ const AdminDashboard = () => {
         .select('*');
       
       if (error) throw error;
-      return data as Contact[];
+      
+      // Map database fields to Contact interface
+      return data.map(contact => ({
+        ...contact,
+        firstName: contact.first_name,
+        lastName: contact.last_name
+      })) as Contact[];
     },
     enabled: !!user && user.role === 'admin'
   });
