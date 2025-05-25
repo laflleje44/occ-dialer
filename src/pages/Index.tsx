@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,16 +41,19 @@ const Index = () => {
     mutationFn: async (newContacts: Contact[]) => {
       if (!user?.id) throw new Error('User not authenticated');
       
-      const contactsWithUserId = newContacts.map(contact => ({
-        ...contact,
+      const contactsForDatabase = newContacts.map(contact => ({
         user_id: user.id,
+        first_name: contact.firstName,
         last_name: contact.lastName,
-        first_name: contact.firstName
+        phone: contact.phone,
+        email: contact.email,
+        comments: contact.comments,
+        attending: contact.attending
       }));
 
       const { error } = await supabase
         .from('contacts')
-        .insert(contactsWithUserId);
+        .insert(contactsForDatabase);
       
       if (error) throw error;
     },
