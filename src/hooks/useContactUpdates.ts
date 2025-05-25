@@ -102,14 +102,9 @@ export const useContactUpdates = () => {
             : contact
         );
       });
-      
-      toast({
-        title: "Contact updated",
-        description: "Contact information has been updated successfully."
-      });
     },
     onSettled: () => {
-      // Always refetch after error or success to ensure we have the latest data
+      // Invalidate and refetch to ensure we have the latest data
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
     }
   });
