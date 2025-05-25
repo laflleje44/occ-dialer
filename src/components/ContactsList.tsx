@@ -1,7 +1,10 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { Phone, Users, Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact } from "@/types/auth";
@@ -94,6 +97,9 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   STATUS
                 </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  ATTENDANCE
+                </th>
                 <th className="px-6 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
                   ACTIONS
                 </th>
@@ -124,6 +130,31 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                     <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">
                       Not Called
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`attend-${contact.id}`}
+                          checked={contact.attending === "yes"}
+                          readOnly
+                        />
+                        <label 
+                          htmlFor={`attend-${contact.id}`}
+                          className="text-sm text-gray-700"
+                        >
+                          Confirmed to attend
+                        </label>
+                      </div>
+                      <div className="w-48">
+                        <Textarea
+                          placeholder="Add comments"
+                          value={contact.comments || ""}
+                          className="min-h-[60px] text-sm"
+                          readOnly
+                        />
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <Button
