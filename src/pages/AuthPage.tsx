@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,14 +18,19 @@ const AuthPage = () => {
   
   const { signIn, signUp, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Redirect if already authenticated
-  if (!authLoading && user) {
-    if (user.role === 'admin') {
-      return <Navigate to="/admin" replace />;
+  // Handle redirect when user is authenticated
+  useEffect(() => {
+    if (!authLoading && user) {
+      console.log('User authenticated, redirecting...', user);
+      if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     }
-    return <Navigate to="/" replace />;
-  }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +50,7 @@ const AuthPage = () => {
             title: "Welcome back!",
             description: "You have been signed in successfully."
           });
+          // Redirect will be handled by useEffect above
         }
       } else {
         const { error } = await signUp(email, password, firstName, lastName);

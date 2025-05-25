@@ -34,11 +34,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: data.email || '',
           first_name: data.first_name,
           last_name: data.last_name,
-          role: (data.role === 'admin' ? 'admin' : 'user') as 'user' | 'admin'
+          role: data.role as 'user' | 'admin'
         });
       } else {
-        // If profile doesn't exist or there's an error, create a basic user object from session
         console.log('Profile fetch error:', error);
+        // Fallback to session user data
         if (session?.user) {
           setUser({
             id: session.user.id,
@@ -65,23 +65,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.id);
-        setSession(session);
-        if (session?.user) {
-          // Use setTimeout to avoid infinite recursion
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-          }, 0);
-        } else {
-          setUser(null);
-        }
-        setLoading(false);
-      }
-    );
-
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session:', session?.user?.id);
@@ -91,6 +74,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       setLoading(false);
     });
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.id);
+        setSession(session);
+        
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
 
     return () => subscription.unsubscribe();
   }, []);
@@ -119,6 +117,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
   };
 
   return (
