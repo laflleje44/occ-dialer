@@ -1,5 +1,5 @@
 
-import { Phone, Upload, Users, FileText, LogOut } from "lucide-react";
+import { Phone, Upload, Users, FileText, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +23,10 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
     if (user?.role === 'admin') {
       navigate('/admin');
     }
+  };
+
+  const handleUserViewClick = () => {
+    navigate('/');
   };
 
   return (
@@ -51,6 +55,12 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
             {user?.role === 'admin' && !isAdmin && (
               <Button variant="outline" size="sm" onClick={handleAdminClick}>
                 Admin
+              </Button>
+            )}
+            {user?.role === 'admin' && isAdmin && (
+              <Button variant="outline" size="sm" onClick={handleUserViewClick}>
+                <User className="w-4 h-4 mr-2" />
+                User View
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={handleSignOut}>
