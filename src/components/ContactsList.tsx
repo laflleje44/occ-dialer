@@ -85,11 +85,8 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
   });
 
   const handleCall = (contact: Contact) => {
-    toast({
-      title: "Initiating call",
-      description: `Calling ${contact.firstName} ${contact.lastName} at ${contact.phone}`
-    });
-    console.log(`Dialing: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
+    // This is now just for logging purposes since the actual call is handled in ContactRow
+    console.log(`Call logged for: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
   };
 
   const handleAttendingChange = (contactId: string, checked: boolean | string) => {

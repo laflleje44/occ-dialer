@@ -5,6 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Phone, MessageSquare } from "lucide-react";
 import { Contact } from "@/types/auth";
 import { useState } from "react";
+import { ringCentralService } from "@/services/ringCentralService";
+import { useToast } from "@/hooks/use-toast";
 
 interface ContactRowProps {
   contact: Contact;
@@ -15,6 +17,12 @@ interface ContactRowProps {
 
 const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: ContactRowProps) => {
   const [localComments, setLocalComments] = useState(contact.comments || "");
+  const [isCallLoading, setIsCallLoading] = useState(false);
+  const [isTextLoading, setIsTextLoading] = useState(false);
+  const { toast } = useToast();
+
+  // You'll need to configure this with your actual RingCentral number
+  const fromNumber = "+1234567890"; // Replace with your RingCentral number
 
   const maskLastName = (lastName: string) => {
     if (!lastName) return '';
@@ -35,8 +43,49 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
     }
   };
 
-  const handleText = (contact: Contact) => {
-    console.log(`Sending text to: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
+  const handleCall = async () => {
+    setIsCallLoading(true);
+    try {
+      await ringCentralService.makeCall(fromNumber, contact.phone);
+      onCall(contact);
+      toast({
+        title: "Call initiated",
+        description: `Calling ${contact.firstName} ${contact.lastName} at ${contact.phone}`
+      });
+    } catch (error) {
+      console.error('Call failed:', error);
+      toast({
+        title: "Call failed",
+        description: "Unable to initiate call. Please check your RingCentral configuration.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCallLoading(false);
+    }
+  };
+
+  const handleText = async () => {
+    setIsTextLoading(true);
+    try {
+      const message = `Hello ${contact.firstName}, this is a message from OCC Secure Dialer.`;
+      await ringCentralService.sendSMS(fromNumber, contact.phone, message);
+      
+      toast({
+        title: "Text sent",
+        description: `Message sent to ${contact.firstName} ${contact.lastName}`
+      });
+      
+      console.log(`Text sent to: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
+    } catch (error) {
+      console.error('Text failed:', error);
+      toast({
+        title: "Text failed",
+        description: "Unable to send text message. Please check your RingCentral configuration.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsTextLoading(false);
+    }
   };
 
   return (
@@ -94,19 +143,21 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
         <div className="flex gap-2 justify-end">
           <Button
             size="sm"
-            onClick={() => handleText(contact)}
+            onClick={handleText}
+            disabled={isTextLoading}
             className="bg-blue-500 hover:bg-blue-600 text-white"
           >
             <MessageSquare className="w-4 h-4 mr-2" />
-            Text
+            {isTextLoading ? "Sending..." : "Text"}
           </Button>
           <Button
             size="sm"
-            onClick={() => onCall(contact)}
+            onClick={handleCall}
+            disabled={isCallLoading}
             className="bg-green-500 hover:bg-green-600 text-white"
           >
             <Phone className="w-4 h-4 mr-2" />
-            Call
+            {isCallLoading ? "Calling..." : "Call"}
           </Button>
         </div>
       </td>
