@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -115,10 +114,7 @@ const Index = () => {
     }
   });
 
-  const handleContactsImported = async (importedContacts: Contact[]) => {
-    // Create a new call session
-    const sessionName = `Call Session ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
-    
+  const handleContactsImported = async (importedContacts: Contact[], sessionName: string) => {
     try {
       const callSession = await createCallSessionMutation.mutateAsync({
         name: sessionName,

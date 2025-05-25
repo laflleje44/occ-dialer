@@ -1,16 +1,19 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { File } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact } from "@/types/auth";
 
 interface UploadContactsProps {
-  onContactsImported: (contacts: Contact[]) => void;
+  onContactsImported: (contacts: Contact[], sessionName: string) => void;
 }
 
 const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [sessionName, setSessionName] = useState("");
+  const [uploadedContacts, setUploadedContacts] = useState<Contact[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -106,10 +109,17 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
           return;
         }
         
-        onContactsImported(contacts);
+        setUploadedContacts(contacts);
+        
+        // Generate default session name if none provided
+        if (!sessionName.trim()) {
+          const defaultName = `Call Session ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+          setSessionName(defaultName);
+        }
+        
         toast({
           title: "Contacts imported successfully",
-          description: `${contacts.length} contacts have been imported.`
+          description: `${contacts.length} contacts have been imported. Please name your session and upload.`
         });
       } catch (error) {
         toast({
@@ -139,6 +149,28 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
     }
   };
 
+  const handleUploadContacts = () => {
+    if (!sessionName.trim()) {
+      toast({
+        title: "Session name required",
+        description: "Please enter a name for your call session.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (uploadedContacts.length === 0) {
+      toast({
+        title: "No contacts to upload",
+        description: "Please select a CSV file first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    onContactsImported(uploadedContacts, sessionName.trim());
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
@@ -146,6 +178,20 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
         <p className="text-gray-600">
           Upload a CSV file with your contact information (columns: last name, name, phone, email, comments, attending). Only names will be visible to callers.
         </p>
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="session-name" className="block text-sm font-medium text-gray-700 mb-2">
+          Call Session Name
+        </label>
+        <Input
+          id="session-name"
+          type="text"
+          placeholder="Enter a name for this call session (e.g., 'Weekly Team Check-in')"
+          value={sessionName}
+          onChange={(e) => setSessionName(e.target.value)}
+          className="w-full"
+        />
       </div>
 
       <div
@@ -186,8 +232,21 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
         className="hidden"
       />
 
+      {uploadedContacts.length > 0 && (
+        <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <h4 className="text-sm font-medium text-green-800 mb-1">File Ready for Upload</h4>
+          <p className="text-sm text-green-700">
+            {uploadedContacts.length} contacts loaded. Enter a session name and click "Upload Contacts" to save.
+          </p>
+        </div>
+      )}
+
       <div className="flex justify-end items-center mt-8">
-        <Button className="bg-green-600 hover:bg-green-700">
+        <Button 
+          onClick={handleUploadContacts}
+          className="bg-green-600 hover:bg-green-700"
+          disabled={uploadedContacts.length === 0 || !sessionName.trim()}
+        >
           Upload Contacts
         </Button>
       </div>
