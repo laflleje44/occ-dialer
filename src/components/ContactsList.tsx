@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-import { Phone, Users, Search } from "lucide-react";
+import { Phone, Users, Search, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact } from "@/types/auth";
 
@@ -36,6 +35,14 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
       description: `Calling ${contact.firstName} ${contact.lastName} at ${contact.phone}`
     });
     console.log(`Dialing: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
+  };
+
+  const handleText = (contact: Contact) => {
+    toast({
+      title: "Opening text message",
+      description: `Texting ${contact.firstName} ${contact.lastName} at ${contact.phone}`
+    });
+    console.log(`Texting: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
   };
 
   const maskLastName = (lastName: string) => {
@@ -157,14 +164,24 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <Button
-                      size="sm"
-                      onClick={() => handleCall(contact)}
-                      className="bg-green-500 hover:bg-green-600 text-white"
-                    >
-                      <Phone className="w-4 h-4 mr-2" />
-                      Call
-                    </Button>
+                    <div className="flex space-x-2 justify-end">
+                      <Button
+                        size="sm"
+                        onClick={() => handleText(contact)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Text
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleCall(contact)}
+                        className="bg-green-500 hover:bg-green-600 text-white"
+                      >
+                        <Phone className="w-4 h-4 mr-2" />
+                        Call
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
