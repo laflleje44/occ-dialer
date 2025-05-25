@@ -1,12 +1,51 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import Header from "@/components/Header";
+import UploadContacts from "@/components/UploadContacts";
+import ContactsList from "@/components/ContactsList";
+import Reports from "@/components/Reports";
+
+export interface Contact {
+  id: string;
+  lastName: string;
+  firstName: string;
+  phone: string;
+  email: string;
+  comments: string;
+  attending: "yes" | "no";
+}
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState("upload");
+  const [contacts, setContacts] = useState<Contact[]>([]);
+
+  const handleContactsImported = (importedContacts: Contact[]) => {
+    setContacts(importedContacts);
+    setActiveTab("contacts");
+  };
+
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case "upload":
+        return <UploadContacts onContactsImported={handleContactsImported} />;
+      case "contacts":
+        return <ContactsList contacts={contacts} />;
+      case "reports":
+        return <Reports contacts={contacts} />;
+      default:
+        return <UploadContacts onContactsImported={handleContactsImported} />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      <main className="container mx-auto px-4 py-8">
+        {renderActiveTab()}
+      </main>
+      <footer className="text-center py-4 text-gray-500 text-sm">
+        Secure Call Manager v1.0 - All calls are logged and monitored for quality assurance
+      </footer>
     </div>
   );
 };
