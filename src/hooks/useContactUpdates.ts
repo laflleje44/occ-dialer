@@ -49,6 +49,8 @@ export const useContactUpdates = () => {
       return data;
     },
     onMutate: async ({ contactId, updates }) => {
+      console.log('Starting optimistic update for contact:', contactId, 'with updates:', updates);
+      
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: ['contacts'] });
 
@@ -58,15 +60,21 @@ export const useContactUpdates = () => {
       // Optimistically update to the new value for this specific contact only
       queryClient.setQueryData(['contacts'], (old: Contact[] | undefined) => {
         if (!old) return old;
-        return old.map(contact => 
-          contact.id === contactId 
-            ? { ...contact, ...updates }
-            : contact
-        );
+        
+        const updatedContacts = old.map(contact => {
+          if (contact.id === contactId) {
+            console.log('Optimistically updating contact:', contact.id, 'from:', contact, 'to:', { ...contact, ...updates });
+            return { ...contact, ...updates };
+          }
+          return contact;
+        });
+        
+        console.log('Updated contacts array:', updatedContacts);
+        return updatedContacts;
       });
 
       // Return a context object with the snapshotted value
-      return { previousContacts };
+      return { previousContacts, contactId, updates };
     },
     onError: (error, variables, context) => {
       console.error('Update mutation error:', error);
@@ -82,8 +90,8 @@ export const useContactUpdates = () => {
         variant: "destructive"
       });
     },
-    onSuccess: (data) => {
-      console.log('Update mutation success:', data);
+    onSuccess: (data, variables, context) => {
+      console.log('Update mutation success for contact:', data.id, 'data:', data);
       
       // Update the cache with the actual response from the server for this specific contact
       queryClient.setQueryData(['contacts'], (old: Contact[] | undefined) => {
@@ -92,6 +100,7 @@ export const useContactUpdates = () => {
           contact.id === data.id 
             ? {
                 ...contact,
+                id: data.id,
                 firstName: data.first_name,
                 lastName: data.last_name,
                 phone: data.phone,
