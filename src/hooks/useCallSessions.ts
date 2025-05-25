@@ -73,7 +73,7 @@ export const useCallSessions = () => {
 
   return {
     callSessions,
-    createCallSession: createCallSessionMutation.mutate,
+    createCallSession: createCallSessionMutation.mutateAsync,
     updateCallSessionContactCount: updateCallSessionContactCountMutation.mutate,
     isCreating: createCallSessionMutation.isPending
   };

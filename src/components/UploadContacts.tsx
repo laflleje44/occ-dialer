@@ -89,7 +89,7 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
     reader.readAsText(file);
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!callSessionName.trim()) {
       toast({
         title: "Call session name required",
@@ -108,13 +108,14 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
       return;
     }
 
-    createCallSession(callSessionName.trim(), {
-      onSuccess: (callSession) => {
-        onContactsImported(parsedContacts, callSession.id);
-        setParsedContacts([]);
-        setCallSessionName("");
-      }
-    });
+    try {
+      const callSession = await createCallSession(callSessionName.trim());
+      onContactsImported(parsedContacts, callSession.id);
+      setParsedContacts([]);
+      setCallSessionName("");
+    } catch (error) {
+      console.error('Error creating call session:', error);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
