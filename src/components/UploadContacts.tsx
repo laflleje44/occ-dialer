@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { File } from "lucide-react";
@@ -27,16 +28,19 @@ const UploadContacts = ({ onContactsImported }: UploadContactsProps) => {
       
       // More flexible header matching for last name
       const lastNameIndex = headers.findIndex(h => 
-        h.includes('last') && h.includes('name') || 
+        (h.includes('last') && h.includes('name')) || 
         h === 'lastname' || 
+        h === 'last_name' ||
         h === 'surname' ||
-        h === 'family name'
+        h === 'family name' ||
+        h === 'l name'
       );
       
       // More flexible header matching for first name
       const firstNameIndex = headers.findIndex(h => 
         (h.includes('first') && h.includes('name')) || 
         h === 'firstname' || 
+        h === 'first_name' ||
         h === 'name' ||
         h === 'given name'
       );
