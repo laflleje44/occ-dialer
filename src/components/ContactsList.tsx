@@ -137,7 +137,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                         <Checkbox 
                           id={`attend-${contact.id}`}
                           checked={contact.attending === "yes"}
-                          readOnly
+                          disabled
                         />
                         <label 
                           htmlFor={`attend-${contact.id}`}
