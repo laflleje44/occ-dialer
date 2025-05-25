@@ -1,20 +1,25 @@
 
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Contact } from "@/types/auth";
+import { Contact, CallSession } from "@/types/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import ContactsListHeader from "./ContactsListHeader";
 import ContactsTable from "./ContactsTable";
 import EmptyContactsState from "./EmptyContactsState";
+import CallSessionSelector from "./CallSessionSelector";
 
 interface ContactsListProps {
   contacts: Contact[];
+  callSessions: CallSession[];
 }
 
-const ContactsList = ({ contacts }: ContactsListProps) => {
+const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAttending, setFilterAttending] = useState<"all" | "yes" | "no">("all");
+  const [selectedCallSessionId, setSelectedCallSessionId] = useState<string | null>(
+    callSessions.length > 0 ? callSessions[0].id : null
+  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -55,7 +60,12 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
     }
   });
 
-  const filteredContacts = contacts.filter(contact => {
+  // Filter contacts by selected call session
+  const sessionContacts = selectedCallSessionId 
+    ? contacts.filter(contact => contact.call_session_id === selectedCallSessionId)
+    : contacts;
+
+  const filteredContacts = sessionContacts.filter(contact => {
     const matchesSearch = 
       contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contact.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -103,12 +113,18 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
     });
   };
 
-  if (contacts.length === 0) {
+  if (callSessions.length === 0) {
     return <EmptyContactsState />;
   }
 
   return (
     <div className="max-w-6xl mx-auto">
+      <CallSessionSelector
+        callSessions={callSessions}
+        selectedCallSessionId={selectedCallSessionId}
+        onCallSessionChange={setSelectedCallSessionId}
+      />
+
       <ContactsListHeader 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}

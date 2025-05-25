@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import UploadContacts from "@/components/UploadContacts";
 import ContactsList from "@/components/ContactsList";
-import { Contact } from "@/types/auth";
+import { Contact, CallSession } from "@/types/auth";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
@@ -14,6 +15,23 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("upload");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const { data: callSessions = [] } = useQuery({
+    queryKey: ['callSessions'],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('call_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data as CallSession[];
+    },
+    enabled: !!user
+  });
 
   const { data: contacts = [] } = useQuery({
     queryKey: ['contacts'],
@@ -37,8 +55,30 @@ const Index = () => {
     enabled: !!user
   });
 
+  const createCallSessionMutation = useMutation({
+    mutationFn: async ({ name, contactCount }: { name: string; contactCount: number }) => {
+      if (!user?.id) throw new Error('User not authenticated');
+      
+      const { data, error } = await supabase
+        .from('call_sessions')
+        .insert({
+          user_id: user.id,
+          name,
+          contact_count: contactCount
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['callSessions'] });
+    }
+  });
+
   const saveContactsMutation = useMutation({
-    mutationFn: async (newContacts: Contact[]) => {
+    mutationFn: async ({ newContacts, callSessionId }: { newContacts: Contact[]; callSessionId: string }) => {
       if (!user?.id) throw new Error('User not authenticated');
       
       const contactsForDatabase = newContacts.map(contact => ({
@@ -48,7 +88,8 @@ const Index = () => {
         phone: contact.phone,
         email: contact.email,
         comments: contact.comments,
-        attending: contact.attending
+        attending: contact.attending,
+        call_session_id: callSessionId
       }));
 
       const { error } = await supabase
@@ -74,9 +115,26 @@ const Index = () => {
     }
   });
 
-  const handleContactsImported = (importedContacts: Contact[]) => {
-    saveContactsMutation.mutate(importedContacts);
-    setActiveTab("dialer");
+  const handleContactsImported = async (importedContacts: Contact[]) => {
+    // Create a new call session
+    const sessionName = `Call Session ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+    
+    try {
+      const callSession = await createCallSessionMutation.mutateAsync({
+        name: sessionName,
+        contactCount: importedContacts.length
+      });
+      
+      // Save contacts with the call session ID
+      await saveContactsMutation.mutateAsync({
+        newContacts: importedContacts,
+        callSessionId: callSession.id
+      });
+      
+      setActiveTab("dialer");
+    } catch (error) {
+      console.error('Error creating call session:', error);
+    }
   };
 
   if (loading) {
@@ -96,7 +154,7 @@ const Index = () => {
       case "upload":
         return <UploadContacts onContactsImported={handleContactsImported} />;
       case "dialer":
-        return <ContactsList contacts={contacts} />;
+        return <ContactsList contacts={contacts} callSessions={callSessions} />;
       default:
         return <UploadContacts onContactsImported={handleContactsImported} />;
     }

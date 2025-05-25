@@ -1,0 +1,40 @@
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CallSession } from "@/types/auth";
+
+interface CallSessionSelectorProps {
+  callSessions: CallSession[];
+  selectedCallSessionId: string | null;
+  onCallSessionChange: (sessionId: string | null) => void;
+}
+
+const CallSessionSelector = ({ callSessions, selectedCallSessionId, onCallSessionChange }: CallSessionSelectorProps) => {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-4">
+        <label htmlFor="call-session" className="text-sm font-medium text-gray-700">
+          Select Call Session:
+        </label>
+        <Select value={selectedCallSessionId || ""} onValueChange={onCallSessionChange}>
+          <SelectTrigger className="w-64">
+            <SelectValue placeholder="Choose a call session" />
+          </SelectTrigger>
+          <SelectContent>
+            {callSessions.map((session) => (
+              <SelectItem key={session.id} value={session.id}>
+                <div className="flex flex-col">
+                  <span className="font-medium">{session.name}</span>
+                  <span className="text-xs text-gray-500">
+                    {session.contact_count} contacts • {new Date(session.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+};
+
+export default CallSessionSelector;

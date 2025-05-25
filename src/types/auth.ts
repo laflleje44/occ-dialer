@@ -16,4 +16,14 @@ export interface Contact {
   email: string;
   comments: string;
   attending: "yes" | "no";
+  call_session_id?: string;
+}
+
+export interface CallSession {
+  id: string;
+  user_id: string;
+  name: string;
+  contact_count: number;
+  created_at: string;
+  updated_at: string;
 }
