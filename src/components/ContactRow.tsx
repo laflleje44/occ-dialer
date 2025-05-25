@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Phone } from "lucide-react";
 import { Contact } from "@/types/auth";
+import { useState } from "react";
 
 interface ContactRowProps {
   contact: Contact;
@@ -13,6 +14,8 @@ interface ContactRowProps {
 }
 
 const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: ContactRowProps) => {
+  const [localComments, setLocalComments] = useState(contact.comments || "");
+
   const maskLastName = (lastName: string) => {
     if (!lastName) return '';
     return lastName.charAt(0) + '*'.repeat(lastName.length - 1);
@@ -23,6 +26,13 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
     const lastFour = phone.slice(-4);
     const maskedPart = '*'.repeat(phone.length - 4);
     return maskedPart + lastFour;
+  };
+
+  const handleCommentsKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onCommentsChange(contact.id, localComments);
+    }
   };
 
   return (
@@ -67,9 +77,10 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
           </div>
           <div className="w-48">
             <Textarea
-              placeholder="Add comments"
-              value={contact.comments || ""}
-              onChange={(e) => onCommentsChange(contact.id, e.target.value)}
+              placeholder="Add comments (press Enter to save)"
+              value={localComments}
+              onChange={(e) => setLocalComments(e.target.value)}
+              onKeyDown={handleCommentsKeyDown}
               className="min-h-[60px] text-sm"
             />
           </div>
