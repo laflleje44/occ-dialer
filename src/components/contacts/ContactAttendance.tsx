@@ -2,6 +2,7 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Contact } from "@/types/auth";
+import { useState } from "react";
 
 interface ContactAttendanceProps {
   contact: Contact;
@@ -14,18 +15,33 @@ const ContactAttendance = ({
   onAttendanceChange, 
   onCommentsChange 
 }: ContactAttendanceProps) => {
+  const [localComments, setLocalComments] = useState(contact.comments || "");
+
   const handleCommentsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onCommentsChange(contact, e.target.value);
+    setLocalComments(e.target.value);
+  };
+
+  const handleCommentsKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onCommentsChange(contact, localComments);
+    }
   };
 
   const handleAttendanceChange = (checked: boolean | string) => {
     onAttendanceChange(contact, checked as boolean);
   };
 
+  // Update local state when contact prop changes
+  if (localComments !== (contact.comments || "")) {
+    setLocalComments(contact.comments || "");
+  }
+
   console.log('ContactAttendance render:', {
     contactId: contact.id,
     attending: contact.attending,
     comments: contact.comments,
+    localComments: localComments,
     firstName: contact.firstName
   });
 
@@ -46,9 +62,10 @@ const ContactAttendance = ({
       </div>
       <div className="w-48">
         <Textarea
-          placeholder="Add comments"
-          value={contact.comments || ""}
+          placeholder="Add comments (press Enter to save)"
+          value={localComments}
           onChange={handleCommentsChange}
+          onKeyDown={handleCommentsKeyDown}
           className="min-h-[60px] text-sm"
         />
       </div>
