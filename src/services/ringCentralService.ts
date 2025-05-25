@@ -1,11 +1,15 @@
 
-import RingCentral from '@ringcentral/sdk';
 import { supabase } from '@/integrations/supabase/client';
 
+interface RingCentralCredentials {
+  RINGCENTRAL_CLIENT_ID: string;
+  RINGCENTRAL_CLIENT_SECRET: string;
+  RINGCENTRAL_SERVER_URL: string;
+}
+
 class RingCentralService {
-  private sdk: any = null;
-  private platform: any = null;
-  private webPhone: any = null;
+  private credentials: RingCentralCredentials | null = null;
+  private accessToken: string | null = null;
   private isInitialized = false;
 
   async initialize() {
@@ -23,17 +27,16 @@ class RingCentralService {
         throw new Error('Ring Central credentials not found');
       }
 
-      this.sdk = new RingCentral({
-        clientId: secrets.RINGCENTRAL_CLIENT_ID,
-        clientSecret: secrets.RINGCENTRAL_CLIENT_SECRET,
-        server: secrets.RINGCENTRAL_SERVER_URL || 'https://platform.devtest.ringcentral.com'
-      });
+      this.credentials = {
+        RINGCENTRAL_CLIENT_ID: secrets.RINGCENTRAL_CLIENT_ID,
+        RINGCENTRAL_CLIENT_SECRET: secrets.RINGCENTRAL_CLIENT_SECRET,
+        RINGCENTRAL_SERVER_URL: secrets.RINGCENTRAL_SERVER_URL || 'https://platform.devtest.ringcentral.com'
+      };
 
-      this.platform = this.sdk.platform();
       this.isInitialized = true;
-      console.log('Ring Central SDK initialized successfully');
+      console.log('Ring Central service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Ring Central SDK:', error);
+      console.error('Failed to initialize Ring Central service:', error);
       throw error;
     }
   }
@@ -42,12 +45,42 @@ class RingCentralService {
     try {
       await this.initialize();
       
-      await this.platform.login({
-        username,
-        password,
-        extension
+      if (!this.credentials) {
+        throw new Error('Ring Central credentials not available');
+      }
+
+      // Create basic auth header for client credentials
+      const basicAuth = btoa(`${this.credentials.RINGCENTRAL_CLIENT_ID}:${this.credentials.RINGCENTRAL_CLIENT_SECRET}`);
+      
+      const body = new URLSearchParams({
+        grant_type: 'password',
+        username: username,
+        password: password,
       });
 
+      if (extension) {
+        body.append('extension', extension);
+      }
+
+      const response = await fetch(`${this.credentials.RINGCENTRAL_SERVER_URL}/restapi/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${basicAuth}`,
+          'Accept': 'application/json'
+        },
+        body: body.toString()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Authentication failed:', errorData);
+        throw new Error('Authentication failed');
+      }
+
+      const tokenData = await response.json();
+      this.accessToken = tokenData.access_token;
+      
       console.log('Ring Central authentication successful');
       return true;
     } catch (error) {
@@ -58,8 +91,12 @@ class RingCentralService {
 
   async makeCall(phoneNumber: string) {
     try {
-      if (!this.platform || !this.platform.loggedIn()) {
+      if (!this.accessToken) {
         throw new Error('Not authenticated with Ring Central');
+      }
+
+      if (!this.credentials) {
+        throw new Error('Ring Central credentials not available');
       }
 
       // Clean phone number
@@ -67,11 +104,25 @@ class RingCentralService {
       
       console.log(`Initiating call to ${cleanNumber}`);
 
-      const response = await this.platform.post('/restapi/v1.0/account/~/extension/~/ring-out', {
-        from: { phoneNumber: 'main' }, // Use main company number
-        to: { phoneNumber: cleanNumber },
-        playPrompt: false
+      const response = await fetch(`${this.credentials.RINGCENTRAL_SERVER_URL}/restapi/v1.0/account/~/extension/~/ring-out`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          from: { phoneNumber: 'main' }, // Use main company number
+          to: { phoneNumber: cleanNumber },
+          playPrompt: false
+        })
       });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Call failed:', errorData);
+        throw new Error('Failed to make call');
+      }
 
       const callData = await response.json();
       console.log('Call initiated successfully:', callData);
@@ -89,7 +140,22 @@ class RingCentralService {
 
   async getCallStatus(callId: string) {
     try {
-      const response = await this.platform.get(`/restapi/v1.0/account/~/extension/~/ring-out/${callId}`);
+      if (!this.accessToken || !this.credentials) {
+        throw new Error('Not authenticated or credentials not available');
+      }
+
+      const response = await fetch(`${this.credentials.RINGCENTRAL_SERVER_URL}/restapi/v1.0/account/~/extension/~/ring-out/${callId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get call status');
+      }
+
       const callData = await response.json();
       return callData.status.callStatus;
     } catch (error) {
@@ -99,13 +165,11 @@ class RingCentralService {
   }
 
   isAuthenticated() {
-    return this.platform && this.platform.loggedIn();
+    return !!this.accessToken;
   }
 
   async logout() {
-    if (this.platform) {
-      await this.platform.logout();
-    }
+    this.accessToken = null;
   }
 }
 
