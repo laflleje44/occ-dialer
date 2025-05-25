@@ -37,8 +37,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           role: data.role as 'user' | 'admin'
         });
       } else {
-        console.log('Profile fetch error:', error);
-        // Fallback to session user data
+        console.log('Profile fetch error, using fallback:', error);
+        // Always create a fallback user to avoid being stuck in loading
         if (session?.user) {
           setUser({
             id: session.user.id,
@@ -50,8 +50,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      // Fallback to session user data
+      console.error('Error fetching profile, using fallback:', error);
+      // Always create a fallback user to avoid being stuck in loading
       if (session?.user) {
         setUser({
           id: session.user.id,
@@ -65,32 +65,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    let mounted = true;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       console.log('Initial session:', session?.user?.id);
       setSession(session);
+      
       if (session?.user) {
-        fetchProfile(session.user.id);
+        // Use setTimeout to avoid blocking and prevent deadlocks
+        setTimeout(() => {
+          if (mounted) {
+            fetchProfile(session.user.id).finally(() => {
+              if (mounted) setLoading(false);
+            });
+          }
+        }, 0);
+      } else {
+        setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state change:', event, session?.user?.id);
         setSession(session);
         
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          // Use setTimeout to defer Supabase calls and prevent deadlocks
+          setTimeout(() => {
+            if (mounted) {
+              fetchProfile(session.user.id).finally(() => {
+                if (mounted) setLoading(false);
+              });
+            }
+          }, 0);
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
