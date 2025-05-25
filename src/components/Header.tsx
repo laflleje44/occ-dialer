@@ -60,7 +60,7 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
             {user?.role === 'admin' && isAdmin && (
               <Button variant="outline" size="sm" onClick={handleUserViewClick}>
                 <User className="w-4 h-4 mr-2" />
-                User View
+                Main Dashboard
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={handleSignOut}>
