@@ -1,6 +1,6 @@
 
 import { Contact } from "@/types/auth";
-import { Badge } from "@/components/ui/badge";
+import { Phone, Check, Clock } from "lucide-react";
 
 interface ReportsProps {
   contacts: Contact[];
@@ -8,101 +8,95 @@ interface ReportsProps {
 
 const Reports = ({ contacts }: ReportsProps) => {
   const totalContacts = contacts.length;
-  const attendingYes = contacts.filter(c => c.attending === "yes").length;
-  const attendingNo = contacts.filter(c => c.attending === "no").length;
-  const withComments = contacts.filter(c => c.comments && c.comments.trim() !== "").length;
-
-  const attendingPercentage = totalContacts > 0 ? (attendingYes / totalContacts * 100).toFixed(1) : 0;
+  
+  // Mock data for call reports since we don't have actual call data yet
+  const totalCalls = 0;
+  const successfulCalls = 0;
+  const avgCallTime = "0:00";
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Reports</h2>
-        <p className="text-gray-600">
-          Overview of your contact database and calling statistics.
-        </p>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Call Reports</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Total Contacts</h3>
-          <p className="text-3xl font-bold text-gray-900">{totalContacts}</p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Attending</h3>
-          <p className="text-3xl font-bold text-green-600">{attendingYes}</p>
-          <p className="text-sm text-gray-500">{attendingPercentage}% of total</p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Not Attending</h3>
-          <p className="text-3xl font-bold text-red-600">{attendingNo}</p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">With Comments</h3>
-          <p className="text-3xl font-bold text-blue-600">{withComments}</p>
-        </div>
-      </div>
-
-      {totalContacts === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow text-center">
-          <p className="text-gray-500">No data available. Import contacts to view reports.</p>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Contact Summary</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Attendance Rate</span>
-                <div className="flex items-center space-x-2">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-green-600 h-2 rounded-full" 
-                      style={{ width: `${attendingPercentage}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium">{attendingPercentage}%</span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">By Attendance Status</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Attending</span>
-                      <Badge variant="default">{attendingYes}</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Not Attending</span>
-                      <Badge variant="secondary">{attendingNo}</Badge>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-2">Data Quality</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Complete Profiles</span>
-                      <Badge variant="outline">{withComments}</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Missing Comments</span>
-                      <Badge variant="outline">{totalContacts - withComments}</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {/* Call Reports Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+              <Phone className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Total Calls</p>
+              <p className="text-3xl font-bold text-gray-900">{totalCalls}</p>
             </div>
           </div>
         </div>
-      )}
+        
+        <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+              <Check className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Successful Calls</p>
+              <p className="text-3xl font-bold text-gray-900">{successfulCalls}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow border">
+          <div className="flex items-center">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+              <Clock className="w-6 h-6 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">Avg. Call Time</p>
+              <p className="text-3xl font-bold text-gray-900">{avgCallTime}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Call History Section */}
+      <div className="mb-8">
+        <h3 className="text-xl font-semibold text-gray-900 mb-6">Call History</h3>
+      </div>
+
+      {/* Call History Table */}
+      <div className="bg-white rounded-lg shadow border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  CONTACT
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  DATE & TIME
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  DURATION
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  OUTCOME
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+                  NOTES
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              <tr>
+                <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  No call history available.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
