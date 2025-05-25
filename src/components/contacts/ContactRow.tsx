@@ -45,6 +45,7 @@ const ContactRow = ({
       </td>
       <td className="px-6 py-4">
         <ContactAttendance
+          key={`${contact.id}-${contact.attending}-${contact.comments}`}
           contact={contact}
           onAttendanceChange={onAttendanceChange}
           onCommentsChange={onCommentsChange}

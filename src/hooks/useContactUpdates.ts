@@ -61,16 +61,13 @@ export const useContactUpdates = () => {
       queryClient.setQueryData(['contacts'], (old: Contact[] | undefined) => {
         if (!old) return old;
         
-        const updatedContacts = old.map(contact => {
+        return old.map(contact => {
           if (contact.id === contactId) {
             console.log('Optimistically updating contact:', contact.id, 'from:', contact, 'to:', { ...contact, ...updates });
             return { ...contact, ...updates };
           }
           return contact;
         });
-        
-        console.log('Updated contacts array:', updatedContacts);
-        return updatedContacts;
       });
 
       // Return a context object with the snapshotted value
