@@ -77,23 +77,23 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
     console.log(`Dialing: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
   };
 
-  const handleAttendingChange = (contact: Contact, checked: boolean | string) => {
-    console.log('Checkbox changed for contact:', contact.id, 'checked:', checked);
+  const handleAttendingChange = (contactId: string, checked: boolean | string) => {
+    console.log('Checkbox changed for contact:', contactId, 'checked:', checked);
     
     const newAttending = checked === true ? "yes" : "no";
     console.log('Setting attending to:', newAttending);
     
     updateContactMutation.mutate({
-      contactId: contact.id,
+      contactId: contactId,
       updates: { attending: newAttending }
     });
   };
 
-  const handleCommentsChange = (contact: Contact, comments: string) => {
-    console.log('Comments changed for contact:', contact.id, 'comments:', comments);
+  const handleCommentsChange = (contactId: string, comments: string) => {
+    console.log('Comments changed for contact:', contactId, 'comments:', comments);
     
     updateContactMutation.mutate({
-      contactId: contact.id,
+      contactId: contactId,
       updates: { comments }
     });
   };
@@ -167,7 +167,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredContacts.map((contact) => (
-                <tr key={contact.id} className="hover:bg-gray-50">
+                <tr key={`contact-${contact.id}`} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
                       {contact.firstName}
@@ -197,7 +197,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                         <Checkbox 
                           id={`attend-${contact.id}`}
                           checked={contact.attending === "yes"}
-                          onCheckedChange={(checked) => handleAttendingChange(contact, checked)}
+                          onCheckedChange={(checked) => handleAttendingChange(contact.id, checked)}
                         />
                         <label 
                           htmlFor={`attend-${contact.id}`}
@@ -210,7 +210,7 @@ const ContactsList = ({ contacts }: ContactsListProps) => {
                         <Textarea
                           placeholder="Add comments"
                           value={contact.comments || ""}
-                          onChange={(e) => handleCommentsChange(contact, e.target.value)}
+                          onChange={(e) => handleCommentsChange(contact.id, e.target.value)}
                           className="min-h-[60px] text-sm"
                         />
                       </div>
