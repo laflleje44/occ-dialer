@@ -41,7 +41,7 @@ class RingCentralService {
     }
   }
 
-  async authenticate(username: string, password: string, extension?: string) {
+  async startOAuthFlow() {
     try {
       await this.initialize();
       
@@ -49,18 +49,54 @@ class RingCentralService {
         throw new Error('Ring Central credentials not available');
       }
 
-      // Create basic auth header for client credentials
+      // Generate OAuth authorization URL
+      const redirectUri = window.location.origin + '/ringcentral-callback';
+      const scope = 'VoipCalling CallControl';
+      const state = Math.random().toString(36).substring(2, 15);
+      
+      // Store state for verification
+      localStorage.setItem('ringcentral_oauth_state', state);
+      
+      const authUrl = `${this.credentials.RINGCENTRAL_SERVER_URL}/restapi/oauth/authorize?` +
+        `response_type=code&` +
+        `client_id=${encodeURIComponent(this.credentials.RINGCENTRAL_CLIENT_ID)}&` +
+        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+        `scope=${encodeURIComponent(scope)}&` +
+        `state=${encodeURIComponent(state)}`;
+
+      // Redirect to Ring Central OAuth page
+      window.location.href = authUrl;
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to start OAuth flow:', error);
+      throw error;
+    }
+  }
+
+  async handleOAuthCallback(code: string, state: string) {
+    try {
+      await this.initialize();
+      
+      if (!this.credentials) {
+        throw new Error('Ring Central credentials not available');
+      }
+
+      // Verify state parameter
+      const storedState = localStorage.getItem('ringcentral_oauth_state');
+      if (state !== storedState) {
+        throw new Error('Invalid OAuth state parameter');
+      }
+
+      // Exchange authorization code for access token
+      const redirectUri = window.location.origin + '/ringcentral-callback';
       const basicAuth = btoa(`${this.credentials.RINGCENTRAL_CLIENT_ID}:${this.credentials.RINGCENTRAL_CLIENT_SECRET}`);
       
       const body = new URLSearchParams({
-        grant_type: 'password',
-        username: username,
-        password: password,
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirectUri,
       });
-
-      if (extension) {
-        body.append('extension', extension);
-      }
 
       const response = await fetch(`${this.credentials.RINGCENTRAL_SERVER_URL}/restapi/oauth/token`, {
         method: 'POST',
@@ -74,23 +110,32 @@ class RingCentralService {
 
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('Authentication failed:', errorData);
-        throw new Error('Authentication failed');
+        console.error('Token exchange failed:', errorData);
+        throw new Error('Token exchange failed');
       }
 
       const tokenData = await response.json();
       this.accessToken = tokenData.access_token;
       
-      console.log('Ring Central authentication successful');
+      // Store token securely
+      localStorage.setItem('ringcentral_access_token', this.accessToken);
+      localStorage.removeItem('ringcentral_oauth_state');
+      
+      console.log('Ring Central OAuth authentication successful');
       return true;
     } catch (error) {
-      console.error('Ring Central authentication failed:', error);
+      console.error('Ring Central OAuth callback failed:', error);
       throw error;
     }
   }
 
   async makeCall(phoneNumber: string) {
     try {
+      // Check for stored token first
+      if (!this.accessToken) {
+        this.accessToken = localStorage.getItem('ringcentral_access_token');
+      }
+
       if (!this.accessToken) {
         throw new Error('Not authenticated with Ring Central');
       }
@@ -121,6 +166,14 @@ class RingCentralService {
       if (!response.ok) {
         const errorData = await response.text();
         console.error('Call failed:', errorData);
+        
+        // If unauthorized, clear stored token
+        if (response.status === 401) {
+          this.accessToken = null;
+          localStorage.removeItem('ringcentral_access_token');
+          throw new Error('Authentication expired. Please re-authenticate.');
+        }
+        
         throw new Error('Failed to make call');
       }
 
@@ -165,11 +218,13 @@ class RingCentralService {
   }
 
   isAuthenticated() {
-    return !!this.accessToken;
+    return !!this.accessToken || !!localStorage.getItem('ringcentral_access_token');
   }
 
   async logout() {
     this.accessToken = null;
+    localStorage.removeItem('ringcentral_access_token');
+    localStorage.removeItem('ringcentral_oauth_state');
   }
 }
 

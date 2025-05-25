@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ringCentralService } from '@/services/ringCentralService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -8,6 +8,41 @@ export const useRingCentral = () => {
   const [isInitializing, setIsInitializing] = useState(false);
   const [activeCalls, setActiveCalls] = useState<Map<string, any>>(new Map());
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check for existing authentication on mount
+    setIsAuthenticated(ringCentralService.isAuthenticated());
+    
+    // Handle OAuth callback if present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    
+    if (code && state) {
+      handleOAuthCallback(code, state);
+    }
+  }, []);
+
+  const handleOAuthCallback = async (code: string, state: string) => {
+    try {
+      await ringCentralService.handleOAuthCallback(code, state);
+      setIsAuthenticated(true);
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      toast({
+        title: "Connected to Ring Central",
+        description: "Successfully authenticated with Ring Central."
+      });
+    } catch (error) {
+      toast({
+        title: "Authentication Failed",
+        description: "Failed to complete Ring Central authentication.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const initialize = useCallback(async () => {
     setIsInitializing(true);
@@ -25,19 +60,14 @@ export const useRingCentral = () => {
     }
   }, [toast]);
 
-  const authenticate = useCallback(async (username: string, password: string, extension?: string) => {
+  const authenticate = useCallback(async () => {
     try {
-      await ringCentralService.authenticate(username, password, extension);
-      setIsAuthenticated(true);
-      toast({
-        title: "Connected to Ring Central",
-        description: "Successfully authenticated with Ring Central."
-      });
+      await ringCentralService.startOAuthFlow();
       return true;
     } catch (error) {
       toast({
         title: "Authentication Failed",
-        description: "Failed to authenticate with Ring Central. Please check your credentials.",
+        description: "Failed to start Ring Central authentication.",
         variant: "destructive"
       });
       return false;
@@ -73,12 +103,21 @@ export const useRingCentral = () => {
         return true;
       }
       return false;
-    } catch (error) {
-      toast({
-        title: "Call Failed",
-        description: `Failed to call ${contactName}. Please try again.`,
-        variant: "destructive"
-      });
+    } catch (error: any) {
+      if (error.message.includes('Authentication expired')) {
+        setIsAuthenticated(false);
+        toast({
+          title: "Session Expired",
+          description: "Please re-authenticate with Ring Central.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Call Failed",
+          description: `Failed to call ${contactName}. Please try again.`,
+          variant: "destructive"
+        });
+      }
       return false;
     }
   }, [isAuthenticated, toast]);
