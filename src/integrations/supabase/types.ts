@@ -9,37 +9,9 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      call_sessions: {
-        Row: {
-          contact_count: number
-          created_at: string
-          id: string
-          name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          contact_count?: number
-          created_at?: string
-          id?: string
-          name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          contact_count?: number
-          created_at?: string
-          id?: string
-          name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       contacts: {
         Row: {
           attending: string
-          call_session_id: string | null
           comments: string | null
           created_at: string
           email: string | null
@@ -52,7 +24,6 @@ export type Database = {
         }
         Insert: {
           attending?: string
-          call_session_id?: string | null
           comments?: string | null
           created_at?: string
           email?: string | null
@@ -65,7 +36,6 @@ export type Database = {
         }
         Update: {
           attending?: string
-          call_session_id?: string | null
           comments?: string | null
           created_at?: string
           email?: string | null
@@ -76,15 +46,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "contacts_call_session_id_fkey"
-            columns: ["call_session_id"]
-            isOneToOne: false
-            referencedRelation: "call_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
