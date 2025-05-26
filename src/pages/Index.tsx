@@ -25,15 +25,19 @@ const Index = () => {
   const { data: callSessions = [] } = useQuery({
     queryKey: ['callSessions'],
     queryFn: async () => {
+      console.log('Fetching call sessions for user:', user?.id, 'role:', user?.role);
       const { data, error } = await supabase
         .from('call_sessions')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) {
+        console.error('Call sessions error:', error);
         throw error;
       }
       
+      console.log('Raw call sessions data:', data);
+      console.log('Number of call sessions:', data?.length || 0);
       return data as CallSession[];
     },
     enabled: !!user
