@@ -32,8 +32,7 @@ const Index = () => {
       
       if (error) throw error;
       return data as CallSession[];
-    },
-    enabled: !!user
+    }
   });
 
   const { data: contacts = [] } = useQuery({
