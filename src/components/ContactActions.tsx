@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Phone, MessageSquare } from "lucide-react";
 import { Contact } from "@/types/auth";
@@ -85,7 +84,7 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
       });
 
       // Use RingCentral service to make the call
-      await ringCentralService.makeCall(config.fromNumber, contact.phone, config);
+      await ringCentralService.makeCall(contact.phone, config);
       
       // Update status to "called" on successful call
       await updateContactStatusMutation.mutateAsync({
@@ -145,7 +144,7 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
       });
 
       // Use RingCentral service to send SMS with config
-      await ringCentralService.sendSMS(config.fromNumber, contact.phone, message, config);
+      await ringCentralService.sendSMS(contact.phone, message, config);
       
       // Update status to "text sent" on successful SMS
       await updateContactStatusMutation.mutateAsync({
