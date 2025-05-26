@@ -27,6 +27,8 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
 
   const handleUserViewClick = () => {
     navigate('/');
+    // Set the active tab to dialer when going to main dashboard
+    setActiveTab('dialer');
   };
 
   return (
