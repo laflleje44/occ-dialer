@@ -46,39 +46,57 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
 
   return (
     <tr key={`contact-${contact.id}`} className="hover:bg-gray-50">
-      <td className="px-6 py-4 whitespace-nowrap">
+      {/* Name column - combines first and last name on mobile */}
+      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
         <div className="text-sm font-medium text-gray-900">
-          {contact.firstName}
+          {contact.firstName} {maskLastName(contact.lastName)}
+        </div>
+        {/* Show last called on mobile under the name */}
+        <div className="text-xs text-gray-500 sm:hidden">
+          Last called: {formatLastCalled(contact.last_called)}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900">
-          {maskLastName(contact.lastName)}
-        </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      
+      {/* Phone column */}
+      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
           {maskPhoneNumber(contact.phone)}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      
+      {/* Last called column - hidden on mobile */}
+      <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-500">
           {formatLastCalled(contact.last_called)}
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      
+      {/* Status column */}
+      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded ${statusDisplay.bgColor} ${statusDisplay.textColor}`}>
           {statusDisplay.text}
         </span>
+        {/* Show comments on mobile under status */}
+        <div className="md:hidden mt-1">
+          <ContactAttendance
+            contact={contact}
+            onAttendingChange={onAttendingChange}
+            onCommentsChange={onCommentsChange}
+          />
+        </div>
       </td>
-      <td className="px-6 py-4">
+      
+      {/* Comments column - hidden on mobile */}
+      <td className="hidden md:table-cell px-6 py-4">
         <ContactAttendance
           contact={contact}
           onAttendingChange={onAttendingChange}
           onCommentsChange={onCommentsChange}
         />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right">
+      
+      {/* Actions column */}
+      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right">
         <ContactActions contact={contact} onCall={onCall} />
       </td>
     </tr>

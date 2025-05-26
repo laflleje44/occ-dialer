@@ -16,25 +16,22 @@ const ContactsTable = ({ contacts, onCall, onAttendingChange, onCommentsChange }
         <table className="min-w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                FIRST NAME
+              <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                NAME
               </th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                LAST NAME
+              <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                PHONE
               </th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
-                PHONE NUMBER
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="hidden sm:table-cell px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 LAST CALLED
               </th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 STATUS
               </th>
-              <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="hidden md:table-cell px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                 COMMENTS
               </th>
-              <th className="px-6 py-4 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 ACTIONS
               </th>
             </tr>
