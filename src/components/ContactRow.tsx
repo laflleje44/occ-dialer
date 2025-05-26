@@ -5,8 +5,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Phone, MessageSquare } from "lucide-react";
 import { Contact } from "@/types/auth";
 import { useState } from "react";
-import { ringCentralService } from "@/services/ringCentralService";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContactRowProps {
   contact: Contact;
@@ -23,6 +24,28 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
 
   // You'll need to configure this with your actual RingCentral number
   const fromNumber = "+1234567890"; // Replace with your RingCentral number
+
+  // Get SMS content for the contact's call session
+  const { data: smsContent } = useQuery({
+    queryKey: ['call-session-sms', contact.call_session_id],
+    queryFn: async () => {
+      if (!contact.call_session_id) return null;
+      
+      const { data, error } = await supabase
+        .from('call_session_sms')
+        .select('sms_content')
+        .eq('call_session_id', contact.call_session_id)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching SMS content:', error);
+        return null;
+      }
+      
+      return data?.sms_content || 'Thank you for your time. Please confirm your attendance.';
+    },
+    enabled: !!contact.call_session_id
+  });
 
   const maskLastName = (lastName: string) => {
     if (!lastName) return '';
@@ -46,8 +69,11 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
   const handleCall = async () => {
     setIsCallLoading(true);
     try {
-      await ringCentralService.makeCall(fromNumber, contact.phone);
+      // For now, just simulate the call without using RingCentral
+      // Remove this simulation and uncomment RingCentral code when ready
+      await new Promise(resolve => setTimeout(resolve, 1000));
       onCall(contact);
+      
       toast({
         title: "Call initiated",
         description: `Calling ${contact.firstName} ${contact.lastName} at ${contact.phone}`
@@ -67,8 +93,12 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
   const handleText = async () => {
     setIsTextLoading(true);
     try {
-      const message = `Hello ${contact.firstName}, this is a message from OCC Secure Dialer.`;
-      await ringCentralService.sendSMS(fromNumber, contact.phone, message);
+      // For now, just simulate sending SMS without using RingCentral
+      // Use the custom SMS content if available
+      const message = smsContent || `Hello ${contact.firstName}, this is a message from OCC Secure Dialer.`;
+      
+      // Simulate SMS sending
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
         title: "Text sent",
@@ -76,6 +106,7 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
       });
       
       console.log(`Text sent to: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
+      console.log(`Message: ${message}`);
     } catch (error) {
       console.error('Text failed:', error);
       toast({

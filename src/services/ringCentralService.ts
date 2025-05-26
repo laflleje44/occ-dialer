@@ -5,6 +5,9 @@ interface RingCentralConfig {
   clientId: string;
   clientSecret: string;
   serverUrl: string;
+  username?: string;
+  extension?: string;
+  password?: string;
 }
 
 interface CallRequest {
@@ -41,23 +44,34 @@ class RingCentralService {
     if (!this.config) throw new Error('RingCentral not configured');
 
     try {
+      // Use password flow for authentication which requires username/extension/password
+      // For production, you should use JWT or other secure authentication methods
+      const authString = btoa(`${this.config.clientId}:${this.config.clientSecret}`);
+      
       const response = await fetch(`${this.config.serverUrl}/restapi/oauth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${btoa(`${this.config.clientId}:${this.config.clientSecret}`)}`
+          'Authorization': `Basic ${authString}`,
+          'Accept': 'application/json'
         },
         body: new URLSearchParams({
-          grant_type: 'client_credentials'
+          grant_type: 'password',
+          username: this.config.username || '',
+          extension: this.config.extension || '',
+          password: this.config.password || ''
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Authentication failed: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('Authentication response:', errorText);
+        throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
       this.accessToken = data.access_token;
+      console.log('RingCentral authentication successful');
     } catch (error) {
       console.error('RingCentral authentication failed:', error);
       throw error;
@@ -107,12 +121,12 @@ class RingCentralService {
     };
 
     try {
-      // Using the correct SMS API endpoint from RingCentral documentation
       const response = await fetch(`${this.config!.serverUrl}/restapi/v1.0/account/~/extension/~/sms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.accessToken}`
+          'Authorization': `Bearer ${this.accessToken}`,
+          'Accept': 'application/json'
         },
         body: JSON.stringify(smsRequest)
       });
