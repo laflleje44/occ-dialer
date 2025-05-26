@@ -22,21 +22,18 @@ const Index = () => {
     }
   }, [user]);
 
-  const { data: callSessions = [], isLoading: callSessionsLoading, error: callSessionsError } = useQuery({
+  const { data: callSessions = [] } = useQuery({
     queryKey: ['callSessions'],
     queryFn: async () => {
-      console.log('Fetching call sessions for regular user...');
       const { data, error } = await supabase
         .from('call_sessions')
         .select('*')
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Error fetching call sessions:', error);
         throw error;
       }
       
-      console.log('Call sessions fetched:', data);
       return data as CallSession[];
     },
     enabled: !!user
@@ -45,17 +42,14 @@ const Index = () => {
   const { data: contacts = [] } = useQuery({
     queryKey: ['contacts'],
     queryFn: async () => {
-      console.log('Fetching contacts...');
       const { data, error } = await supabase
         .from('contacts')
         .select('*');
       
       if (error) {
-        console.error('Error fetching contacts:', error);
         throw error;
       }
       
-      console.log('Contacts fetched:', data?.length || 0, 'contacts');
       // Map database fields to Contact interface
       return data.map(contact => ({
         ...contact,
@@ -65,16 +59,6 @@ const Index = () => {
     },
     enabled: !!user
   });
-
-  // Add some debugging logs
-  useEffect(() => {
-    if (user) {
-      console.log('User authenticated:', user);
-      console.log('Call sessions loading:', callSessionsLoading);
-      console.log('Call sessions error:', callSessionsError);
-      console.log('Call sessions data:', callSessions);
-    }
-  }, [user, callSessionsLoading, callSessionsError, callSessions]);
 
   if (loading) {
     return (
