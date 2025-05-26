@@ -107,6 +107,7 @@ class RingCentralService {
     };
 
     try {
+      // Using the correct SMS API endpoint from RingCentral documentation
       const response = await fetch(`${this.config!.serverUrl}/restapi/v1.0/account/~/extension/~/sms`, {
         method: 'POST',
         headers: {
@@ -117,10 +118,13 @@ class RingCentralService {
       });
 
       if (!response.ok) {
-        throw new Error(`SMS failed: ${response.statusText}`);
+        const errorData = await response.text();
+        console.error('SMS API Error Response:', errorData);
+        throw new Error(`SMS failed: ${response.status} ${response.statusText}`);
       }
 
-      console.log('SMS sent successfully');
+      const responseData = await response.json();
+      console.log('SMS sent successfully:', responseData);
     } catch (error) {
       console.error('Failed to send SMS:', error);
       throw error;
