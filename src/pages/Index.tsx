@@ -88,7 +88,8 @@ const Index = () => {
         email: contact.email,
         comments: contact.comments,
         attending: contact.attending,
-        call_session_id: callSessionId
+        call_session_id: callSessionId,
+        status: 'not called'
       }));
 
       const { error } = await supabase

@@ -4,7 +4,7 @@ import { Phone, MessageSquare } from "lucide-react";
 import { Contact } from "@/types/auth";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ringCentralService } from "@/services/ringCentralService";
 
@@ -17,6 +17,7 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
   const [isCallLoading, setIsCallLoading] = useState(false);
   const [isTextLoading, setIsTextLoading] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Get SMS content for the contact's call session
   const { data: smsContent } = useQuery({
@@ -40,6 +41,32 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
     enabled: !!contact.call_session_id
   });
 
+  const updateContactStatusMutation = useMutation({
+    mutationFn: async ({ contactId, status }: { contactId: string; status: string }) => {
+      console.log('Updating contact status:', contactId, 'to:', status);
+      
+      const { error } = await supabase
+        .from('contacts')
+        .update({
+          status,
+          last_called: new Date().toISOString(),
+          status_updated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', contactId);
+      
+      if (error) {
+        console.error('Supabase update error:', error);
+        throw error;
+      }
+      
+      console.log('Contact status updated successfully');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contacts'] });
+    }
+  });
+
   const handleCall = async () => {
     setIsCallLoading(true);
     try {
@@ -59,6 +86,13 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
 
       // Use RingCentral service to make the call
       await ringCentralService.makeCall(config.fromNumber, contact.phone, config);
+      
+      // Update status to "called" on successful call
+      await updateContactStatusMutation.mutateAsync({
+        contactId: contact.id,
+        status: "called"
+      });
+      
       onCall(contact);
       
       toast({
@@ -67,6 +101,13 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
       });
     } catch (error) {
       console.error('Call failed:', error);
+      
+      // Update status to "call failed" on error
+      await updateContactStatusMutation.mutateAsync({
+        contactId: contact.id,
+        status: "call failed"
+      });
+      
       toast({
         title: "Call failed",
         description: error instanceof Error ? error.message : "Unable to initiate call. Please check your RingCentral configuration.",
@@ -106,6 +147,12 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
       // Use RingCentral service to send SMS with config
       await ringCentralService.sendSMS(config.fromNumber, contact.phone, message, config);
       
+      // Update status to "text sent" on successful SMS
+      await updateContactStatusMutation.mutateAsync({
+        contactId: contact.id,
+        status: "text sent"
+      });
+      
       toast({
         title: "Text sent",
         description: `Message sent to ${contact.firstName} ${contact.lastName}`
@@ -114,6 +161,12 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
       console.log(`SMS sent successfully to: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
     } catch (error) {
       console.error('Text failed:', error);
+      
+      // Update status to "call failed" (we can use same status for SMS failures)
+      await updateContactStatusMutation.mutateAsync({
+        contactId: contact.id,
+        status: "call failed"
+      });
       
       // Check if it's the specific "phone number doesn't belong to extension" error
       const errorMessage = error instanceof Error ? error.message : '';

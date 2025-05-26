@@ -17,6 +17,9 @@ export interface Contact {
   comments: string;
   attending: "yes" | "no";
   call_session_id?: string;
+  status?: "not called" | "called" | "busy" | "call failed" | "text sent";
+  last_called?: string;
+  status_updated_at?: string;
 }
 
 export interface CallSession {
