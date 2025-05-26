@@ -8,6 +8,7 @@ import ContactsListHeader from "./ContactsListHeader";
 import ContactsTable from "./ContactsTable";
 import EmptyContactsState from "./EmptyContactsState";
 import CallSessionSelector from "./CallSessionSelector";
+import CallerNumberSettings from "./CallerNumberSettings";
 
 interface ContactsListProps {
   contacts: Contact[];
@@ -112,6 +113,9 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
 
   return (
     <div className="max-w-6xl mx-auto">
+      {/* Caller ID Settings - show at the top of dialer tab */}
+      <CallerNumberSettings />
+
       {/* Always show the call session selector */}
       <CallSessionSelector
         callSessions={callSessions}

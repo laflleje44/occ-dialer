@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 
 class RingCentralService {
   private accessToken: string | null = null;
@@ -11,6 +12,27 @@ class RingCentralService {
       jwtToken: config.jwtToken ? 'present' : 'missing'
     });
     await this.authenticate();
+  }
+
+  private async getUserCallerNumber(): Promise<string | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase.rpc('get_user_ringcentral_settings', {
+        user_uuid: user.id
+      });
+
+      if (error || !data || data.length === 0) {
+        console.log('No user caller number found, using default');
+        return null;
+      }
+
+      return data[0].caller_number;
+    } catch (error) {
+      console.error('Error fetching user caller number:', error);
+      return null;
+    }
   }
 
   private async authenticate() {
@@ -94,7 +116,7 @@ class RingCentralService {
     }
   }
 
-  async makeCall(from: string, to: string, config?: any) {
+  async makeCall(to: string, config?: any) {
     try {
       // If config is provided, initialize with it
       if (config && !this.config) {
@@ -106,6 +128,14 @@ class RingCentralService {
           throw new Error('RingCentral service not initialized');
         }
         await this.authenticate();
+      }
+
+      // Get user-specific caller number, fallback to default
+      const userCallerNumber = await this.getUserCallerNumber();
+      const from = userCallerNumber || this.config.ringoutCaller;
+
+      if (!from) {
+        throw new Error('No caller number configured. Please set your caller ID in settings.');
       }
 
       console.log('Making RingOut call:', { from, to });
@@ -139,7 +169,7 @@ class RingCentralService {
     }
   }
 
-  async sendSMS(from: string, to: string, text: string, config?: any) {
+  async sendSMS(to: string, text: string, config?: any) {
     try {
       // If config is provided, initialize with it
       if (config && !this.config) {
@@ -151,6 +181,14 @@ class RingCentralService {
           throw new Error('RingCentral service not initialized');
         }
         await this.authenticate();
+      }
+
+      // Get user-specific caller number, fallback to default
+      const userCallerNumber = await this.getUserCallerNumber();
+      const from = userCallerNumber || this.config.ringoutCaller;
+
+      if (!from) {
+        throw new Error('No caller number configured. Please set your caller ID in settings.');
       }
 
       console.log('Sending SMS:', { from, to, text });
