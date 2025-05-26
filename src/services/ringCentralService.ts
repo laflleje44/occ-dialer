@@ -5,12 +5,21 @@ class RingCentralService {
 
   async initialize(config: any) {
     this.config = config;
+    console.log('Initializing RingCentral with config:', {
+      clientId: config.clientId ? 'present' : 'missing',
+      serverUrl: config.serverUrl,
+      username: config.username ? 'present' : 'missing'
+    });
     await this.authenticate();
   }
 
   private async authenticate() {
     if (!this.config) {
       throw new Error('RingCentral not configured');
+    }
+
+    if (!this.config.clientId || !this.config.clientSecret || !this.config.username || !this.config.password) {
+      throw new Error('Missing required RingCentral credentials');
     }
 
     try {
@@ -46,10 +55,18 @@ class RingCentralService {
     }
   }
 
-  async makeCall(from: string, to: string) {
+  async makeCall(from: string, to: string, config?: any) {
     try {
+      // If config is provided, initialize with it
+      if (config && !this.config) {
+        await this.initialize(config);
+      }
+
       if (!this.accessToken) {
-        await this.initialize(this.config);
+        if (!this.config) {
+          throw new Error('RingCentral service not initialized');
+        }
+        await this.authenticate();
       }
 
       console.log('Making RingOut call:', { from, to });
@@ -83,10 +100,18 @@ class RingCentralService {
     }
   }
 
-  async sendSMS(from: string, to: string, text: string) {
+  async sendSMS(from: string, to: string, text: string, config?: any) {
     try {
+      // If config is provided, initialize with it
+      if (config && !this.config) {
+        await this.initialize(config);
+      }
+
       if (!this.accessToken) {
-        await this.initialize(this.config);
+        if (!this.config) {
+          throw new Error('RingCentral service not initialized');
+        }
+        await this.authenticate();
       }
 
       console.log('Sending SMS:', { from, to, text });

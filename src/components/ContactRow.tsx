@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -74,8 +73,15 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
         throw new Error('RingCentral configuration not found');
       }
 
+      console.log('RingCentral config received:', {
+        clientId: config.clientId ? 'present' : 'missing',
+        serverUrl: config.serverUrl,
+        username: config.username ? 'present' : 'missing',
+        fromNumber: config.fromNumber
+      });
+
       // Use RingCentral service to make the call
-      await ringCentralService.makeCall(config.fromNumber, contact.phone);
+      await ringCentralService.makeCall(config.fromNumber, contact.phone, config);
       onCall(contact);
       
       toast({
@@ -86,7 +92,7 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
       console.error('Call failed:', error);
       toast({
         title: "Call failed",
-        description: "Unable to initiate call. Please check your RingCentral configuration.",
+        description: error instanceof Error ? error.message : "Unable to initiate call. Please check your RingCentral configuration.",
         variant: "destructive"
       });
     } finally {
@@ -104,6 +110,13 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
         throw new Error('RingCentral configuration not found');
       }
 
+      console.log('RingCentral config received for SMS:', {
+        clientId: config.clientId ? 'present' : 'missing',
+        serverUrl: config.serverUrl,
+        username: config.username ? 'present' : 'missing',
+        fromNumber: config.fromNumber
+      });
+
       // Use the custom SMS content if available
       const message = smsContent || `Hello ${contact.firstName}, this is a message from OCC Secure Dialer.`;
       
@@ -113,8 +126,8 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
         message: message
       });
 
-      // Use RingCentral service to send SMS
-      await ringCentralService.sendSMS(config.fromNumber, contact.phone, message);
+      // Use RingCentral service to send SMS with config
+      await ringCentralService.sendSMS(config.fromNumber, contact.phone, message, config);
       
       toast({
         title: "Text sent",
