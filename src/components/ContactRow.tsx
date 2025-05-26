@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ringCentralService } from "@/services/ringCentralService";
 
 interface ContactRowProps {
   contact: Contact;
@@ -21,9 +22,6 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
   const [isCallLoading, setIsCallLoading] = useState(false);
   const [isTextLoading, setIsTextLoading] = useState(false);
   const { toast } = useToast();
-
-  // You'll need to configure this with your actual RingCentral number
-  const fromNumber = "+1234567890"; // Replace with your RingCentral number
 
   // Get SMS content for the contact's call session
   const { data: smsContent } = useQuery({
@@ -69,9 +67,15 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
   const handleCall = async () => {
     setIsCallLoading(true);
     try {
-      // For now, just simulate the call without using RingCentral
-      // Remove this simulation and uncomment RingCentral code when ready
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get RingCentral config first to get the from number
+      const { data: config, error } = await supabase.functions.invoke('get-ringcentral-config');
+      
+      if (error || !config) {
+        throw new Error('RingCentral configuration not found');
+      }
+
+      // Use RingCentral service to make the call
+      await ringCentralService.makeCall(config.fromNumber, contact.phone);
       onCall(contact);
       
       toast({
@@ -93,25 +97,36 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
   const handleText = async () => {
     setIsTextLoading(true);
     try {
-      // For now, just simulate sending SMS without using RingCentral
+      // Get RingCentral config first to get the from number
+      const { data: config, error } = await supabase.functions.invoke('get-ringcentral-config');
+      
+      if (error || !config) {
+        throw new Error('RingCentral configuration not found');
+      }
+
       // Use the custom SMS content if available
       const message = smsContent || `Hello ${contact.firstName}, this is a message from OCC Secure Dialer.`;
       
-      // Simulate SMS sending
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Sending SMS with RingCentral:', {
+        from: config.fromNumber,
+        to: contact.phone,
+        message: message
+      });
+
+      // Use RingCentral service to send SMS
+      await ringCentralService.sendSMS(config.fromNumber, contact.phone, message);
       
       toast({
         title: "Text sent",
         description: `Message sent to ${contact.firstName} ${contact.lastName}`
       });
       
-      console.log(`Text sent to: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
-      console.log(`Message: ${message}`);
+      console.log(`SMS sent successfully to: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
     } catch (error) {
       console.error('Text failed:', error);
       toast({
         title: "Text failed",
-        description: "Unable to send text message. Please check your RingCentral configuration.",
+        description: error instanceof Error ? error.message : "Unable to send text message. Please check your RingCentral configuration.",
         variant: "destructive"
       });
     } finally {

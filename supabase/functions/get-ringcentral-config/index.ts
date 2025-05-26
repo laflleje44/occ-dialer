@@ -15,7 +15,11 @@ serve(async (req) => {
     const config = {
       clientId: Deno.env.get('RINGCENTRAL_CLIENT_ID'),
       clientSecret: Deno.env.get('RINGCENTRAL_CLIENT_SECRET'),
-      serverUrl: Deno.env.get('RINGCENTRAL_SERVER_URL') || 'https://platform.ringcentral.com'
+      serverUrl: Deno.env.get('RINGCENTRAL_SERVER_URL') || 'https://platform.ringcentral.com',
+      username: Deno.env.get('RINGCENTRAL_USERNAME'),
+      extension: Deno.env.get('RINGCENTRAL_EXTENSION'),
+      password: Deno.env.get('RINGCENTRAL_PASSWORD'),
+      fromNumber: Deno.env.get('RINGCENTRAL_RINGOUT_CALLER')
     };
 
     if (!config.clientId || !config.clientSecret) {
