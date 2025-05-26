@@ -5,13 +5,17 @@ import { Navigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Reports from '@/components/Reports';
 import SMSManager from '@/components/SMSManager';
-import { useQuery } from '@tanstack/react-query';
+import UploadContacts from '@/components/UploadContacts';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Contact, CallSession } from '@/types/auth';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminDashboard = () => {
   const { user, loading } = useAuth();
-  const [activeTab, setActiveTab] = useState("reports");
+  const [activeTab, setActiveTab] = useState("upload");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: allContacts = [] } = useQuery({
     queryKey: ['admin-contacts'],
@@ -47,6 +51,86 @@ const AdminDashboard = () => {
     enabled: !!user && user.role === 'admin'
   });
 
+  const createCallSessionMutation = useMutation({
+    mutationFn: async ({ name, contactCount }: { name: string; contactCount: number }) => {
+      if (!user?.id) throw new Error('User not authenticated');
+      
+      const { data, error } = await supabase
+        .from('call_sessions')
+        .insert({
+          user_id: user.id,
+          name,
+          contact_count: contactCount
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-call-sessions'] });
+    }
+  });
+
+  const saveContactsMutation = useMutation({
+    mutationFn: async ({ newContacts, callSessionId }: { newContacts: Contact[]; callSessionId: string }) => {
+      if (!user?.id) throw new Error('User not authenticated');
+      
+      const contactsForDatabase = newContacts.map(contact => ({
+        user_id: user.id,
+        first_name: contact.firstName,
+        last_name: contact.lastName,
+        phone: contact.phone,
+        email: contact.email,
+        comments: contact.comments,
+        attending: contact.attending,
+        call_session_id: callSessionId,
+        status: 'not called'
+      }));
+
+      const { error } = await supabase
+        .from('contacts')
+        .insert(contactsForDatabase);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-contacts'] });
+      toast({
+        title: "Contacts saved",
+        description: "Your contacts have been saved to the database."
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error saving contacts",
+        description: "There was an error saving your contacts. Please try again.",
+        variant: "destructive"
+      });
+      console.error('Error saving contacts:', error);
+    }
+  });
+
+  const handleContactsImported = async (importedContacts: Contact[], sessionName: string) => {
+    try {
+      const callSession = await createCallSessionMutation.mutateAsync({
+        name: sessionName,
+        contactCount: importedContacts.length
+      });
+      
+      // Save contacts with the call session ID
+      await saveContactsMutation.mutateAsync({
+        newContacts: importedContacts,
+        callSessionId: callSession.id
+      });
+      
+      setActiveTab("reports");
+    } catch (error) {
+      console.error('Error creating call session:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -67,6 +151,9 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} isAdmin={true} />
       <main className="container mx-auto px-4 py-8">
+        {activeTab === "upload" && (
+          <UploadContacts onContactsImported={handleContactsImported} />
+        )}
         {activeTab === "reports" && (
           <Reports contacts={allContacts} callSessions={allCallSessions} />
         )}

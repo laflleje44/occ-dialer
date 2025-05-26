@@ -74,6 +74,17 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
           {isAdmin ? (
             <>
               <button
+                onClick={() => setActiveTab("upload")}
+                className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
+                  activeTab === "upload"
+                    ? "border-green-500 text-green-600 bg-green-50"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+                <span>Upload Contacts</span>
+              </button>
+              <button
                 onClick={() => setActiveTab("reports")}
                 className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
                   activeTab === "reports"
@@ -97,30 +108,17 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
               </button>
             </>
           ) : (
-            <>
-              <button
-                onClick={() => setActiveTab("upload")}
-                className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
-                  activeTab === "upload"
-                    ? "border-green-500 text-green-600 bg-green-50"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <Upload className="w-4 h-4" />
-                <span>Upload Contacts</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("dialer")}
-                className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
-                  activeTab === "dialer"
-                    ? "border-green-500 text-green-600 bg-green-50"
-                    : "border-transparent text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                <Users className="w-4 h-4" />
-                <span>Dialer</span>
-              </button>
-            </>
+            <button
+              onClick={() => setActiveTab("dialer")}
+              className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
+                activeTab === "dialer"
+                  ? "border-green-500 text-green-600 bg-green-50"
+                  : "border-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              <span>Dialer</span>
+            </button>
           )}
         </nav>
       </div>
