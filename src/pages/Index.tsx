@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,12 +37,9 @@ const Index = () => {
   const { data: contacts = [] } = useQuery({
     queryKey: ['contacts'],
     queryFn: async () => {
-      if (!user?.id) return [];
-      
       const { data, error } = await supabase
         .from('contacts')
-        .select('*')
-        .eq('user_id', user.id);
+        .select('*');
       
       if (error) throw error;
       
@@ -53,8 +49,7 @@ const Index = () => {
         firstName: contact.first_name,
         lastName: contact.last_name
       })) as Contact[];
-    },
-    enabled: !!user
+    }
   });
 
   if (loading) {
