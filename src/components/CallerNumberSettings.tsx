@@ -88,18 +88,9 @@ const CallerNumberSettings = () => {
   };
 
   const handlePhoneChange = (value: string) => {
-    // Remove all non-digit characters
-    const digitsOnly = value.replace(/\D/g, '');
-    
-    // Format as phone number
-    let formatted = digitsOnly;
-    if (digitsOnly.length >= 10) {
-      formatted = `+1${digitsOnly.slice(-10)}`;
-    } else if (digitsOnly.length > 0) {
-      formatted = `+1${digitsOnly}`;
-    }
-    
-    setCallerNumber(formatted);
+    // Allow users to type freely, just clean up the input
+    const cleaned = value.replace(/[^\d+\-\(\)\s]/g, '');
+    setCallerNumber(cleaned);
   };
 
   if (isLoading) {
