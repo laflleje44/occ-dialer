@@ -6,7 +6,7 @@ import Header from '@/components/Header';
 import Reports from '@/components/Reports';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Contact } from '@/types/auth';
+import { Contact, CallSession } from '@/types/auth';
 
 const AdminDashboard = () => {
   const { user, loading } = useAuth();
@@ -31,6 +31,21 @@ const AdminDashboard = () => {
     enabled: !!user && user.role === 'admin'
   });
 
+  const { data: allCallSessions = [] } = useQuery({
+    queryKey: ['admin-call-sessions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('call_sessions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      return data as CallSession[];
+    },
+    enabled: !!user && user.role === 'admin'
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -51,7 +66,7 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} isAdmin={true} />
       <main className="container mx-auto px-4 py-8">
-        <Reports contacts={allContacts} />
+        <Reports contacts={allContacts} callSessions={allCallSessions} />
       </main>
       <footer className="text-center py-4 text-gray-500 text-sm">
         OCC Secure Dialer v1.2 - All calls are logged and monitored for quality assurance

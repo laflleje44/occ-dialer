@@ -1,13 +1,23 @@
 
-import { Contact } from "@/types/auth";
+import { useState } from "react";
+import { Contact, CallSession } from "@/types/auth";
 import { Phone, Check, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface ReportsProps {
   contacts: Contact[];
+  callSessions: CallSession[];
 }
 
-const Reports = ({ contacts }: ReportsProps) => {
-  const totalContacts = contacts.length;
+const Reports = ({ contacts, callSessions }: ReportsProps) => {
+  const [selectedCallSessionId, setSelectedCallSessionId] = useState<string | "all">("all");
+
+  // Filter contacts based on selected call session
+  const filteredContacts = selectedCallSessionId === "all" 
+    ? contacts 
+    : contacts.filter(contact => contact.call_session_id === selectedCallSessionId);
+
+  const totalContacts = filteredContacts.length;
   
   // Mock data for call reports since we don't have actual call data yet
   const totalCalls = 0;
@@ -17,7 +27,41 @@ const Reports = ({ contacts }: ReportsProps) => {
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Call Reports</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Call Reports</h2>
+        
+        {/* Call Session Selector */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4">
+            <label htmlFor="call-session-filter" className="text-sm font-medium text-gray-700">
+              Filter by Call Session:
+            </label>
+            <Select value={selectedCallSessionId} onValueChange={setSelectedCallSessionId}>
+              <SelectTrigger className="w-64">
+                <SelectValue placeholder="Choose a call session" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <div className="flex flex-col">
+                    <span className="font-medium">All Sessions</span>
+                    <span className="text-xs text-gray-500">
+                      {contacts.length} total contacts
+                    </span>
+                  </div>
+                </SelectItem>
+                {callSessions.map((session) => (
+                  <SelectItem key={session.id} value={session.id}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{session.name}</span>
+                      <span className="text-xs text-gray-500">
+                        {contacts.filter(c => c.call_session_id === session.id).length} contacts • {new Date(session.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       {/* Call Reports Metrics */}
@@ -52,8 +96,8 @@ const Reports = ({ contacts }: ReportsProps) => {
               <Clock className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-1">Avg. Call Time</p>
-              <p className="text-3xl font-bold text-gray-900">{avgCallTime}</p>
+              <p className="text-sm text-gray-600 mb-1">Total Contacts</p>
+              <p className="text-3xl font-bold text-gray-900">{totalContacts}</p>
             </div>
           </div>
         </div>
