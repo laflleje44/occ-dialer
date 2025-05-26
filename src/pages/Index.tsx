@@ -32,7 +32,8 @@ const Index = () => {
       
       if (error) throw error;
       return data as CallSession[];
-    }
+    },
+    enabled: !!user
   });
 
   const { data: contacts = [] } = useQuery({
@@ -50,7 +51,8 @@ const Index = () => {
         firstName: contact.first_name,
         lastName: contact.last_name
       })) as Contact[];
-    }
+    },
+    enabled: !!user
   });
 
   if (loading) {
