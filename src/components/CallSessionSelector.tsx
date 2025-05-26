@@ -9,6 +9,24 @@ interface CallSessionSelectorProps {
 }
 
 const CallSessionSelector = ({ callSessions, selectedCallSessionId, onCallSessionChange }: CallSessionSelectorProps) => {
+  if (callSessions.length === 0) {
+    return (
+      <div className="mb-6">
+        <div className="flex items-center gap-4">
+          <label htmlFor="call-session" className="text-sm font-medium text-gray-700">
+            Select Call Session:
+          </label>
+          <div className="w-64 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-500">
+            No call sessions available
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 mt-2">
+          Contact your administrator to have call sessions created and contacts uploaded.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mb-6">
       <div className="flex items-center gap-4">

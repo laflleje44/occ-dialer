@@ -110,34 +110,37 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
     });
   };
 
-  if (callSessions.length === 0) {
-    return <EmptyContactsState />;
-  }
-
   return (
     <div className="max-w-6xl mx-auto">
+      {/* Always show the call session selector */}
       <CallSessionSelector
         callSessions={callSessions}
         selectedCallSessionId={selectedCallSessionId}
         onCallSessionChange={setSelectedCallSessionId}
       />
 
-      <ContactsListHeader 
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
+      {callSessions.length === 0 ? (
+        <EmptyContactsState />
+      ) : (
+        <>
+          <ContactsListHeader 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
 
-      <ContactsTable
-        contacts={filteredContacts}
-        onCall={handleCall}
-        onAttendingChange={handleAttendingChange}
-        onCommentsChange={handleCommentsChange}
-      />
+          <ContactsTable
+            contacts={filteredContacts}
+            onCall={handleCall}
+            onAttendingChange={handleAttendingChange}
+            onCommentsChange={handleCommentsChange}
+          />
 
-      {filteredContacts.length === 0 && searchTerm && (
-        <div className="text-center py-8">
-          <p className="text-gray-500">No contacts found matching your search criteria.</p>
-        </div>
+          {filteredContacts.length === 0 && searchTerm && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No contacts found matching your search criteria.</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
