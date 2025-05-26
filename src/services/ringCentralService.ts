@@ -8,7 +8,7 @@ class RingCentralService {
     console.log('Initializing RingCentral with config:', {
       clientId: config.clientId ? 'present' : 'missing',
       serverUrl: config.serverUrl,
-      username: config.username ? 'present' : 'missing'
+      jwtToken: config.jwtToken ? 'present' : 'missing'
     });
     await this.authenticate();
   }
@@ -18,10 +18,49 @@ class RingCentralService {
       throw new Error('RingCentral not configured');
     }
 
-    if (!this.config.clientId || !this.config.clientSecret || !this.config.username || !this.config.password) {
-      throw new Error('Missing required RingCentral credentials');
+    // Check if we have JWT token for authentication
+    if (this.config.jwtToken) {
+      await this.authenticateWithJWT();
+    } else if (this.config.clientId && this.config.clientSecret && this.config.username && this.config.password) {
+      await this.authenticateWithPassword();
+    } else {
+      throw new Error('Missing required RingCentral credentials (need either JWT token or username/password)');
     }
+  }
 
+  private async authenticateWithJWT() {
+    try {
+      console.log('Authenticating with RingCentral using JWT...');
+      
+      const response = await fetch(`${this.config.serverUrl}/restapi/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${btoa(`${this.config.clientId}:${this.config.clientSecret}`)}`
+        },
+        body: new URLSearchParams({
+          grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+          assertion: this.config.jwtToken
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('JWT Authentication response:', errorText);
+        throw new Error(`JWT Authentication failed: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      this.accessToken = data.access_token;
+      console.log('RingCentral JWT authentication successful');
+      
+    } catch (error) {
+      console.error('RingCentral JWT authentication failed:', error);
+      throw error;
+    }
+  }
+
+  private async authenticateWithPassword() {
     try {
       console.log('Authenticating with RingCentral using password flow...');
       

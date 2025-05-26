@@ -19,6 +19,7 @@ serve(async (req) => {
       username: Deno.env.get('RINGCENTRAL_USERNAME'),
       extension: Deno.env.get('RINGCENTRAL_EXTENSION'),
       password: Deno.env.get('RINGCENTRAL_PASSWORD'),
+      jwtToken: Deno.env.get('RINGCENTRAL_JWT_TOKEN'),
       fromNumber: Deno.env.get('RINGCENTRAL_RINGOUT_CALLER')
     };
 
