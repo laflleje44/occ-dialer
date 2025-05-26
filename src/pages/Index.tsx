@@ -25,12 +25,9 @@ const Index = () => {
   const { data: callSessions = [] } = useQuery({
     queryKey: ['callSessions'],
     queryFn: async () => {
-      if (!user?.id) return [];
-      
       const { data, error } = await supabase
         .from('call_sessions')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
