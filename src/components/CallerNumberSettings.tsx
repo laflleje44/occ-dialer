@@ -28,17 +28,16 @@ const CallerNumberSettings = () => {
     queryFn: async () => {
       if (!user?.id) return null;
       
-      const { data, error } = await supabase
-        .from('user_ringcentral_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc('get_user_ringcentral_settings', {
+        p_user_id: user.id
+      });
       
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (error) {
+        console.error('Error fetching user settings:', error);
+        return null;
       }
       
-      return data as UserRingCentralSettings | null;
+      return data?.[0] as UserRingCentralSettings | null;
     },
     enabled: !!user?.id
   });
@@ -47,14 +46,10 @@ const CallerNumberSettings = () => {
     mutationFn: async (callerNumber: string) => {
       if (!user?.id) throw new Error('User not authenticated');
       
-      const { data, error } = await supabase
-        .from('user_ringcentral_settings')
-        .upsert({
-          user_id: user.id,
-          caller_number: callerNumber
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('upsert_user_ringcentral_settings', {
+        p_user_id: user.id,
+        p_caller_number: callerNumber
+      });
       
       if (error) throw error;
       return data;

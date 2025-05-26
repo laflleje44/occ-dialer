@@ -19,12 +19,13 @@ export const makeCall = async (toNumber: string, fromNumber?: string): Promise<v
     // Get user-specific caller number if not provided
     let callerNumber = fromNumber;
     if (!callerNumber) {
-      const { data: userSettings } = await supabase
-        .from('user_ringcentral_settings')
-        .select('caller_number')
-        .maybeSingle();
+      const { data: userSettings, error } = await supabase.rpc('get_user_ringcentral_settings', {
+        p_user_id: (await supabase.auth.getUser()).data.user?.id
+      });
       
-      callerNumber = userSettings?.caller_number;
+      if (!error && userSettings?.[0]) {
+        callerNumber = userSettings[0].caller_number;
+      }
     }
     
     const { data, error } = await supabase.functions.invoke('ringcentral-make-call', {

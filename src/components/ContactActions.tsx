@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ringCentralService } from "@/services/ringCentralService";
+import { makeCall } from "@/services/ringCentralService";
 
 interface ContactActionsProps {
   contact: Contact;
@@ -70,22 +70,7 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
   const handleCall = async () => {
     setIsCallLoading(true);
     try {
-      // Get RingCentral config first to get the from number
-      const { data: config, error } = await supabase.functions.invoke('get-ringcentral-config');
-      
-      if (error || !config) {
-        throw new Error('RingCentral configuration not found');
-      }
-
-      console.log('RingCentral config received:', {
-        clientId: config.clientId ? 'present' : 'missing',
-        serverUrl: config.serverUrl,
-        username: config.username ? 'present' : 'missing',
-        fromNumber: config.fromNumber
-      });
-
-      // Use RingCentral service to make the call
-      await ringCentralService.makeCall(config.fromNumber, contact.phone, config);
+      await makeCall(contact.phone);
       
       // Update status to "called" on successful call
       await updateContactStatusMutation.mutateAsync({
@@ -144,8 +129,8 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
         message: message
       });
 
-      // Use RingCentral service to send SMS with config
-      await ringCentralService.sendSMS(config.fromNumber, contact.phone, message, config);
+      // TODO: Implement SMS sending through RingCentral edge function
+      console.log('SMS functionality not yet implemented');
       
       // Update status to "text sent" on successful SMS
       await updateContactStatusMutation.mutateAsync({

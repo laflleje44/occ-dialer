@@ -21,13 +21,8 @@ serve(async (req) => {
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false
-      }
-    })
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Get the authorization header
     const authHeader = req.headers.get('Authorization')
@@ -62,8 +57,19 @@ serve(async (req) => {
       throw new Error('RingCentral credentials not configured')
     }
 
-    // Use provided fromNumber or default
-    const callerNumber = fromNumber || config.defaultFromNumber
+    // Use provided fromNumber, or get user-specific number, or use default
+    let callerNumber = fromNumber
+    
+    if (!callerNumber) {
+      // Try to get user-specific caller number
+      const { data: userSettings } = await supabase
+        .from('user_ringcentral_settings')
+        .select('caller_number')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      
+      callerNumber = userSettings?.caller_number || config.defaultFromNumber
+    }
     
     if (!callerNumber) {
       throw new Error('No caller number available. Please set your caller ID number.')
