@@ -27,9 +27,20 @@ const CallerNumberSettings = () => {
     
     setIsLoading(true);
     try {
-      // Store caller number in the profile for now since user_ringcentral_settings table doesn't exist
-      // In a real implementation, you would have a separate settings table
-      setCallerNumber(""); // Default empty for now
+      const { data, error } = await supabase
+        .from('user_ringcentral_settings')
+        .select('caller_number')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user settings:', error);
+        return;
+      }
+
+      if (data) {
+        setCallerNumber(data.caller_number);
+      }
     } catch (error) {
       console.error('Error fetching user settings:', error);
     } finally {
@@ -49,10 +60,20 @@ const CallerNumberSettings = () => {
 
     setIsSaving(true);
     try {
-      // For now, just show success. In a real implementation, you would save to a settings table
+      const { error } = await supabase
+        .from('user_ringcentral_settings')
+        .upsert({
+          user_id: user.id,
+          caller_number: callerNumber.trim()
+        });
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Success",
-        description: "Caller number saved. Note: Database integration pending.",
+        description: "Caller number updated successfully"
       });
     } catch (error) {
       console.error('Error saving caller number:', error);

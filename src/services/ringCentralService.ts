@@ -16,9 +16,21 @@ class RingCentralService {
 
   private async getUserCallerNumber(): Promise<string | null> {
     try {
-      // For now, return null since user_ringcentral_settings table doesn't exist
-      // In a real implementation, you would fetch from a settings table
-      return null;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('user_ringcentral_settings')
+        .select('caller_number')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user caller number:', error);
+        return null;
+      }
+
+      return data?.caller_number || null;
     } catch (error) {
       console.error('Error fetching user caller number:', error);
       return null;
