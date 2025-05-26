@@ -16,7 +16,7 @@ const CallSessionSelector = ({ callSessions, selectedCallSessionId, onCallSessio
           <label htmlFor="call-session" className="text-sm font-medium text-gray-700">
             Select Call Session:
           </label>
-          <div className="w-64 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-500">
+          <div className="w-80 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-500">
             No call sessions available
           </div>
         </div>
@@ -34,7 +34,7 @@ const CallSessionSelector = ({ callSessions, selectedCallSessionId, onCallSessio
           Select Call Session:
         </label>
         <Select value={selectedCallSessionId || ""} onValueChange={onCallSessionChange}>
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="w-80">
             <SelectValue placeholder="Choose a call session" />
           </SelectTrigger>
           <SelectContent>
