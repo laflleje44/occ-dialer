@@ -1,5 +1,5 @@
 
-import { Phone, Upload, Users, FileText, LogOut, User, MessageSquare } from "lucide-react";
+import { Phone, Upload, Users, FileText, LogOut, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -23,12 +23,6 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
     if (user?.role === 'admin') {
       navigate('/admin');
     }
-  };
-
-  const handleUserViewClick = () => {
-    navigate('/');
-    // Set the active tab to dialer when going to main dashboard
-    setActiveTab('dialer');
   };
 
   return (
@@ -57,12 +51,6 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
             {user?.role === 'admin' && !isAdmin && (
               <Button variant="outline" size="sm" onClick={handleAdminClick}>
                 Admin
-              </Button>
-            )}
-            {user?.role === 'admin' && isAdmin && (
-              <Button variant="outline" size="sm" onClick={handleUserViewClick}>
-                <User className="w-4 h-4 mr-2" />
-                Main Dashboard
               </Button>
             )}
             <Button variant="outline" size="sm" onClick={handleSignOut}>
@@ -107,6 +95,17 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>SMS Management</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("dialer")}
+                className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
+                  activeTab === "dialer"
+                    ? "border-green-500 text-green-600 bg-green-50"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <Users className="w-4 h-4" />
+                <span>Dialer</span>
               </button>
             </>
           ) : (

@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Reports from '@/components/Reports';
 import SMSManager from '@/components/SMSManager';
 import UploadContacts from '@/components/UploadContacts';
+import ContactsList from '@/components/ContactsList';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Contact, CallSession } from '@/types/auth';
@@ -159,6 +160,9 @@ const AdminDashboard = () => {
         )}
         {activeTab === "sms" && (
           <SMSManager callSessions={allCallSessions} />
+        )}
+        {activeTab === "dialer" && (
+          <ContactsList contacts={allContacts} callSessions={allCallSessions} />
         )}
       </main>
       <footer className="text-center py-4 text-gray-500 text-sm">
