@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Reports from '@/components/Reports';
+import SMSManager from '@/components/SMSManager';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Contact, CallSession } from '@/types/auth';
@@ -66,7 +67,12 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <Header activeTab={activeTab} setActiveTab={setActiveTab} isAdmin={true} />
       <main className="container mx-auto px-4 py-8">
-        <Reports contacts={allContacts} callSessions={allCallSessions} />
+        {activeTab === "reports" && (
+          <Reports contacts={allContacts} callSessions={allCallSessions} />
+        )}
+        {activeTab === "sms" && (
+          <SMSManager callSessions={allCallSessions} />
+        )}
       </main>
       <footer className="text-center py-4 text-gray-500 text-sm">
         OCC Secure Dialer v1.2 - All calls are logged and monitored for quality assurance

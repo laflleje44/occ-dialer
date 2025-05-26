@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      call_session_sms: {
+        Row: {
+          call_session_id: string
+          created_at: string
+          id: string
+          sms_content: string
+          updated_at: string
+        }
+        Insert: {
+          call_session_id: string
+          created_at?: string
+          id?: string
+          sms_content?: string
+          updated_at?: string
+        }
+        Update: {
+          call_session_id?: string
+          created_at?: string
+          id?: string
+          sms_content?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_session_sms_call_session_id_fkey"
+            columns: ["call_session_id"]
+            isOneToOne: true
+            referencedRelation: "call_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_sessions: {
         Row: {
           contact_count: number

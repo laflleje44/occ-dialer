@@ -1,5 +1,5 @@
 
-import { Phone, Upload, Users, FileText, LogOut, User } from "lucide-react";
+import { Phone, Upload, Users, FileText, LogOut, User, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -72,17 +72,30 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
         
         <nav className="flex space-x-0 border-b">
           {isAdmin ? (
-            <button
-              onClick={() => setActiveTab("reports")}
-              className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
-                activeTab === "reports"
-                  ? "border-green-500 text-green-600 bg-green-50"
-                  : "border-transparent text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <span>Reports</span>
-            </button>
+            <>
+              <button
+                onClick={() => setActiveTab("reports")}
+                className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
+                  activeTab === "reports"
+                    ? "border-green-500 text-green-600 bg-green-50"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>Reports</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("sms")}
+                className={`flex items-center space-x-2 px-6 py-3 border-b-2 transition-colors ${
+                  activeTab === "sms"
+                    ? "border-green-500 text-green-600 bg-green-50"
+                    : "border-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>SMS Management</span>
+              </button>
+            </>
           ) : (
             <>
               <button
