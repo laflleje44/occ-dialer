@@ -27,17 +27,19 @@ const CallerNumberSettings = () => {
     
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.rpc('get_user_ringcentral_settings', {
-        user_uuid: user.id
-      });
+      const { data, error } = await supabase
+        .from('user_ringcentral_settings')
+        .select('caller_number')
+        .eq('user_id', user.id)
+        .single();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching user settings:', error);
         return;
       }
 
-      if (data && data.length > 0) {
-        setCallerNumber(data[0].caller_number);
+      if (data) {
+        setCallerNumber(data.caller_number);
       }
     } catch (error) {
       console.error('Error fetching user settings:', error);
@@ -58,9 +60,12 @@ const CallerNumberSettings = () => {
 
     setIsSaving(true);
     try {
-      const { data, error } = await supabase.rpc('upsert_user_ringcentral_settings', {
-        caller_number_param: callerNumber.trim()
-      });
+      const { error } = await supabase
+        .from('user_ringcentral_settings')
+        .upsert({
+          user_id: user.id,
+          caller_number: callerNumber.trim()
+        });
 
       if (error) {
         throw error;

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 class RingCentralService {
@@ -19,16 +20,18 @@ class RingCentralService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data, error } = await supabase.rpc('get_user_ringcentral_settings', {
-        user_uuid: user.id
-      });
+      const { data, error } = await supabase
+        .from('user_ringcentral_settings')
+        .select('caller_number')
+        .eq('user_id', user.id)
+        .single();
 
-      if (error || !data || data.length === 0) {
-        console.log('No user caller number found, using default');
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching user caller number:', error);
         return null;
       }
 
-      return data[0].caller_number;
+      return data?.caller_number || null;
     } catch (error) {
       console.error('Error fetching user caller number:', error);
       return null;
