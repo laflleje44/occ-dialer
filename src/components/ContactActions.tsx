@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Phone, MessageSquare } from "lucide-react";
 import { Contact } from "@/types/auth";
@@ -192,11 +193,11 @@ const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
       <Button
         size="sm"
         onClick={handleText}
-        disabled={isTextLoading}
-        className="bg-blue-500 hover:bg-blue-600 text-white"
+        disabled={true}
+        className="bg-gray-400 hover:bg-gray-400 text-gray-600 cursor-not-allowed"
       >
         <MessageSquare className="w-4 h-4 mr-2" />
-        {isTextLoading ? "Sending..." : "Text"}
+        Text
       </Button>
       <Button
         size="sm"
