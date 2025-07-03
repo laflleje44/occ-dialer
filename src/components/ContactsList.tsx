@@ -9,6 +9,7 @@ import ContactsTable from "./ContactsTable";
 import EmptyContactsState from "./EmptyContactsState";
 import CallSessionSelector from "./CallSessionSelector";
 import CallerNumberSettings from "./CallerNumberSettings";
+import CallStatusBar, { CallStatus } from "./CallStatusBar";
 
 interface ContactsListProps {
   contacts: Contact[];
@@ -21,6 +22,7 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
   const [selectedCallSessionId, setSelectedCallSessionId] = useState<string | null>(
     callSessions.length > 0 ? callSessions[0].id : null
   );
+  const [callStatuses, setCallStatuses] = useState<CallStatus[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -156,6 +158,22 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
     console.log(`Call logged for: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
   };
 
+  const handleStatusUpdate = (status: CallStatus) => {
+    setCallStatuses(prev => {
+      const existingIndex = prev.findIndex(s => s.id === status.id);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = status;
+        return updated;
+      }
+      return [...prev, status];
+    });
+  };
+
+  const handleClearStatus = (id: string) => {
+    setCallStatuses(prev => prev.filter(status => status.id !== id));
+  };
+
   const handleAttendingChange = (contactId: string, checked: boolean | string) => {
     console.log('Checkbox changed for contact:', contactId, 'checked:', checked);
     
@@ -191,6 +209,12 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
 
   return (
     <div className="max-w-6xl mx-auto">
+      {/* Call Status Bar - show above Telephone Settings */}
+      <CallStatusBar 
+        callStatuses={callStatuses}
+        onClearStatus={handleClearStatus}
+      />
+
       {/* Caller ID Settings - show at the top of dialer tab */}
       <CallerNumberSettings />
 
@@ -215,6 +239,7 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
             onCall={handleCall}
             onAttendingChange={handleAttendingChange}
             onCommentsChange={handleCommentsChange}
+            onStatusUpdate={handleStatusUpdate}
           />
 
           {filteredContacts.length === 0 && searchTerm && (

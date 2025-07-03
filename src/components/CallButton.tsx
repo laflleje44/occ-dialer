@@ -3,25 +3,42 @@ import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 import { Contact } from "@/types/auth";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ringCentralService } from "@/services/ringCentralService";
 import { useContactMutations } from "@/hooks/useContactMutations";
-import { maskPhoneNumber } from "@/utils/contactUtils";
 
 interface CallButtonProps {
   contact: Contact;
   onCall: (contact: Contact) => void;
+  onStatusUpdate?: (status: {
+    id: string;
+    contactName: string;
+    phone: string;
+    status: 'initiating' | 'connecting' | 'ringing' | 'connected' | 'completed' | 'failed';
+    progress: number;
+    timestamp: Date;
+  }) => void;
 }
 
-const CallButton = ({ contact, onCall }: CallButtonProps) => {
+const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
   const [isCallLoading, setIsCallLoading] = useState(false);
-  const { toast } = useToast();
   const { updateContactStatusMutation } = useContactMutations();
 
   const handleCall = async () => {
     setIsCallLoading(true);
+    const callId = `call-${contact.id}-${Date.now()}`;
+    
     try {
+      // Update status to initiating
+      onStatusUpdate?.({
+        id: callId,
+        contactName: `${contact.firstName} ${contact.lastName}`,
+        phone: contact.phone,
+        status: 'initiating',
+        progress: 10,
+        timestamp: new Date()
+      });
+
       // Get RingCentral config first to get the from number
       const { data: config, error } = await supabase.functions.invoke('get-ringcentral-config');
       
@@ -36,8 +53,52 @@ const CallButton = ({ contact, onCall }: CallButtonProps) => {
         fromNumber: config.fromNumber
       });
 
+      // Update status to connecting
+      onStatusUpdate?.({
+        id: callId,
+        contactName: `${contact.firstName} ${contact.lastName}`,
+        phone: contact.phone,
+        status: 'connecting',
+        progress: 30,
+        timestamp: new Date()
+      });
+
       // Use RingCentral service to make the call
       await ringCentralService.makeCall(contact.phone, config);
+      
+      // Update status to ringing
+      onStatusUpdate?.({
+        id: callId,
+        contactName: `${contact.firstName} ${contact.lastName}`,
+        phone: contact.phone,
+        status: 'ringing',
+        progress: 60,
+        timestamp: new Date()
+      });
+
+      // Simulate call progression
+      setTimeout(() => {
+        onStatusUpdate?.({
+          id: callId,
+          contactName: `${contact.firstName} ${contact.lastName}`,
+          phone: contact.phone,
+          status: 'connected',
+          progress: 90,
+          timestamp: new Date()
+        });
+
+        // Mark as completed after a short delay
+        setTimeout(() => {
+          onStatusUpdate?.({
+            id: callId,
+            contactName: `${contact.firstName} ${contact.lastName}`,
+            phone: contact.phone,
+            status: 'completed',
+            progress: 100,
+            timestamp: new Date()
+          });
+        }, 2000);
+      }, 3000);
       
       // Update status to "called" on successful call
       await updateContactStatusMutation.mutateAsync({
@@ -47,23 +108,23 @@ const CallButton = ({ contact, onCall }: CallButtonProps) => {
       
       onCall(contact);
       
-      toast({
-        title: "Call initiated",
-        description: `Calling ${contact.firstName} ${contact.lastName} at ${maskPhoneNumber(contact.phone)}`
-      });
     } catch (error) {
       console.error('Call failed:', error);
+      
+      // Update status to failed
+      onStatusUpdate?.({
+        id: callId,
+        contactName: `${contact.firstName} ${contact.lastName}`,
+        phone: contact.phone,
+        status: 'failed',
+        progress: 0,
+        timestamp: new Date()
+      });
       
       // Update status to "call failed" on error
       await updateContactStatusMutation.mutateAsync({
         contactId: contact.id,
         status: "call failed"
-      });
-      
-      toast({
-        title: "Call failed",
-        description: error instanceof Error ? error.message : "Unable to initiate call. Please check your RingCentral configuration.",
-        variant: "destructive"
       });
     } finally {
       setIsCallLoading(false);
