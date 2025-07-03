@@ -41,19 +41,24 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
         dbUpdates.comments = updates.comments;
       }
       
-      const { error } = await supabase
+      console.log('Database updates being sent:', dbUpdates);
+      
+      const { data, error } = await supabase
         .from('contacts')
         .update(dbUpdates)
-        .eq('id', contactId);
+        .eq('id', contactId)
+        .select();
       
       if (error) {
         console.error('Supabase update error:', error);
         throw error;
       }
       
-      console.log('Contact updated successfully');
+      console.log('Contact updated successfully, returned data:', data);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
       toast({
         title: "Contact updated",
@@ -61,12 +66,12 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
       });
     },
     onError: (error) => {
+      console.error('Mutation error:', error);
       toast({
         title: "Error updating contact",
         description: "There was an error updating the contact. Please try again.",
         variant: "destructive"
       });
-      console.error('Error updating contact:', error);
     }
   });
 
