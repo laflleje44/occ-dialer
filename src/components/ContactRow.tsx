@@ -50,6 +50,7 @@ const ContactRow = ({
         <ContactAttendance 
           contact={contact}
           onAttendingChange={onAttendingChange}
+          onCommentsChange={onCommentsChange}
         />
       </TableCell>
       <TableCell>
