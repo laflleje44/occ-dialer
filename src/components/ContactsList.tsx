@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact, CallSession } from "@/types/auth";
@@ -209,12 +208,6 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Call Status Bar - show above Telephone Settings */}
-      <CallStatusBar 
-        callStatuses={callStatuses}
-        onClearStatus={handleClearStatus}
-      />
-
       {/* Caller ID Settings - show at the top of dialer tab */}
       <CallerNumberSettings />
 
@@ -232,6 +225,12 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
           <ContactsListHeader 
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
+          />
+
+          {/* Call Status Bar - moved to above the contacts table */}
+          <CallStatusBar 
+            callStatuses={callStatuses}
+            onClearStatus={handleClearStatus}
           />
 
           <ContactsTable

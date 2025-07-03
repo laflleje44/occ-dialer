@@ -2,15 +2,16 @@
 import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, PhoneCall, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Phone, PhoneCall, CheckCircle, XCircle, AlertCircle, PhoneIncoming } from "lucide-react";
 
 export interface CallStatus {
   id: string;
   contactName: string;
   phone: string;
-  status: 'initiating' | 'connecting' | 'ringing' | 'connected' | 'completed' | 'failed';
+  status: 'initiating' | 'connecting' | 'ringing' | 'connected' | 'answered' | 'completed' | 'failed' | 'busy' | 'no-answer';
   progress: number;
   timestamp: Date;
+  step?: string; // For more granular status descriptions
 }
 
 interface CallStatusBarProps {
@@ -29,10 +30,16 @@ const CallStatusBar = ({ callStatuses, onClearStatus }: CallStatusBarProps) => {
         return 'bg-orange-500';
       case 'connected':
         return 'bg-green-500';
-      case 'completed':
+      case 'answered':
         return 'bg-green-600';
+      case 'completed':
+        return 'bg-green-700';
       case 'failed':
         return 'bg-red-500';
+      case 'busy':
+        return 'bg-red-400';
+      case 'no-answer':
+        return 'bg-gray-500';
       default:
         return 'bg-gray-500';
     }
@@ -46,29 +53,44 @@ const CallStatusBar = ({ callStatuses, onClearStatus }: CallStatusBarProps) => {
       case 'ringing':
         return <PhoneCall className="w-4 h-4 animate-pulse" />;
       case 'connected':
+      case 'answered':
+        return <PhoneIncoming className="w-4 h-4" />;
       case 'completed':
         return <CheckCircle className="w-4 h-4" />;
       case 'failed':
+      case 'busy':
+      case 'no-answer':
         return <XCircle className="w-4 h-4" />;
       default:
         return <AlertCircle className="w-4 h-4" />;
     }
   };
 
-  const getStatusText = (status: CallStatus['status']) => {
-    switch (status) {
+  const getStatusText = (callStatus: CallStatus) => {
+    // Use the step field for more granular descriptions if available
+    if (callStatus.step) {
+      return callStatus.step;
+    }
+
+    switch (callStatus.status) {
       case 'initiating':
-        return 'Initiating call...';
+        return `Initiating call to ${callStatus.contactName}...`;
       case 'connecting':
-        return 'Connecting...';
+        return `Connecting to ${callStatus.contactName}...`;
       case 'ringing':
-        return 'Ringing...';
+        return `Calling ${callStatus.contactName} - ringing...`;
       case 'connected':
-        return 'Call connected';
+        return `Connected to ${callStatus.contactName}`;
+      case 'answered':
+        return `${callStatus.contactName} answered the call`;
       case 'completed':
-        return 'Call completed';
+        return `Call with ${callStatus.contactName} completed`;
       case 'failed':
-        return 'Call failed';
+        return `Call to ${callStatus.contactName} failed`;
+      case 'busy':
+        return `${callStatus.contactName} is busy`;
+      case 'no-answer':
+        return `${callStatus.contactName} did not answer`;
       default:
         return 'Unknown status';
     }
@@ -82,7 +104,7 @@ const CallStatusBar = ({ callStatuses, onClearStatus }: CallStatusBarProps) => {
   // Auto-clear completed or failed statuses after 5 seconds
   useEffect(() => {
     callStatuses.forEach(status => {
-      if (status.status === 'completed' || status.status === 'failed') {
+      if (status.status === 'completed' || status.status === 'failed' || status.status === 'busy' || status.status === 'no-answer') {
         const timer = setTimeout(() => {
           onClearStatus(status.id);
         }, 5000);
@@ -108,12 +130,12 @@ const CallStatusBar = ({ callStatuses, onClearStatus }: CallStatusBarProps) => {
                 </div>
                 <div>
                   <span className="font-medium">
-                    {callStatus.contactName} - {maskPhoneNumber(callStatus.phone)}
+                    {maskPhoneNumber(callStatus.phone)}
                   </span>
-                  <p className="text-sm text-gray-600">{getStatusText(callStatus.status)}</p>
+                  <p className="text-sm text-gray-600">{getStatusText(callStatus)}</p>
                 </div>
               </div>
-              {(callStatus.status === 'completed' || callStatus.status === 'failed') && (
+              {(callStatus.status === 'completed' || callStatus.status === 'failed' || callStatus.status === 'busy' || callStatus.status === 'no-answer') && (
                 <button
                   onClick={() => onClearStatus(callStatus.id)}
                   className="text-gray-400 hover:text-gray-600"
