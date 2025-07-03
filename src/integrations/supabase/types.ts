@@ -71,6 +71,7 @@ export type Database = {
       contacts: {
         Row: {
           attending: string
+          call_initiated: boolean
           call_session_id: string | null
           comments: string | null
           created_at: string
@@ -87,6 +88,7 @@ export type Database = {
         }
         Insert: {
           attending?: string
+          call_initiated?: boolean
           call_session_id?: string | null
           comments?: string | null
           created_at?: string
@@ -103,6 +105,7 @@ export type Database = {
         }
         Update: {
           attending?: string
+          call_initiated?: boolean
           call_session_id?: string | null
           comments?: string | null
           created_at?: string

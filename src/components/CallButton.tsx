@@ -30,7 +30,16 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
     const callId = `call-${contact.id}-${Date.now()}`;
     
     try {
-      // Step 1: Initiating call
+      // Step 1: Set call_initiated to true at the very start
+      await supabase
+        .from('contacts')
+        .update({ 
+          call_initiated: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', contact.id);
+
+      // Step 2: Initiating call
       onStatusUpdate?.({
         id: callId,
         contactName: `${contact.firstName} ${contact.lastName}`,
@@ -55,7 +64,7 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
         fromNumber: config.fromNumber
       });
 
-      // Step 2: Connecting to service
+      // Step 3: Connecting to service
       onStatusUpdate?.({
         id: callId,
         contactName: `${contact.firstName} ${contact.lastName}`,
@@ -66,7 +75,7 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
         step: `Connecting to RingCentral service...`
       });
 
-      // Step 3: Placing call
+      // Step 4: Placing call
       onStatusUpdate?.({
         id: callId,
         contactName: `${contact.firstName} ${contact.lastName}`,
@@ -80,7 +89,7 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
       // Use RingCentral service to make the call
       await ringCentralService.makeCall(contact.phone, config);
       
-      // Step 4: Call is ringing
+      // Step 5: Call is ringing
       onStatusUpdate?.({
         id: callId,
         contactName: `${contact.firstName} ${contact.lastName}`,
@@ -93,7 +102,7 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
 
       // Simulate call progression with more granular updates
       setTimeout(() => {
-        // Step 5: Call connected
+        // Step 6: Call connected
         onStatusUpdate?.({
           id: callId,
           contactName: `${contact.firstName} ${contact.lastName}`,
@@ -104,7 +113,7 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
           step: `Call connected to ${contact.firstName} ${contact.lastName}`
         });
 
-        // Step 6: Person answered
+        // Step 7: Person answered
         setTimeout(() => {
           onStatusUpdate?.({
             id: callId,
@@ -116,7 +125,7 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
             step: `${contact.firstName} ${contact.lastName} answered the call`
           });
 
-          // Step 7: Call completed
+          // Step 8: Call completed
           setTimeout(() => {
             onStatusUpdate?.({
               id: callId,
@@ -141,6 +150,15 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
       
     } catch (error) {
       console.error('Call failed:', error);
+      
+      // Reset call_initiated to false if call fails
+      await supabase
+        .from('contacts')
+        .update({ 
+          call_initiated: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', contact.id);
       
       // Update status to failed with specific error message
       onStatusUpdate?.({

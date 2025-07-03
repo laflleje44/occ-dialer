@@ -20,6 +20,7 @@ export interface Contact {
   status?: "not called" | "called" | "busy" | "call failed" | "text sent";
   last_called?: string;
   status_updated_at?: string;
+  call_initiated?: boolean;
 }
 
 export interface CallSession {

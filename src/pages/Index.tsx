@@ -58,7 +58,8 @@ const Index = () => {
       return data.map(contact => ({
         ...contact,
         firstName: contact.first_name,
-        lastName: contact.last_name
+        lastName: contact.last_name,
+        call_initiated: contact.call_initiated ?? false
       })) as Contact[];
     },
     enabled: !!user

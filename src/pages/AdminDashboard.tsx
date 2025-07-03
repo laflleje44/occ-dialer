@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
@@ -31,7 +30,8 @@ const AdminDashboard = () => {
       return data.map(contact => ({
         ...contact,
         firstName: contact.first_name,
-        lastName: contact.last_name
+        lastName: contact.last_name,
+        call_initiated: contact.call_initiated ?? false
       })) as Contact[];
     },
     enabled: !!user && user.role === 'admin'
@@ -87,7 +87,8 @@ const AdminDashboard = () => {
         comments: contact.comments,
         attending: contact.attending,
         call_session_id: callSessionId,
-        status: 'not called'
+        status: 'not called',
+        call_initiated: false
       }));
 
       const { error } = await supabase

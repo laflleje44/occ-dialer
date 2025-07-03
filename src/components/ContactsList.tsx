@@ -42,6 +42,10 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
         dbUpdates.comments = updates.comments;
       }
       
+      if (updates.call_initiated !== undefined) {
+        dbUpdates.call_initiated = updates.call_initiated;
+      }
+      
       console.log('Database updates being sent:', dbUpdates);
       
       const { data, error } = await supabase
@@ -61,6 +65,7 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
     onSuccess: (data) => {
       console.log('Mutation successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['contacts'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-contacts'] });
       toast({
         title: "Contact updated",
         description: "Contact information has been saved successfully."
