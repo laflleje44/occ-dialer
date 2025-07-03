@@ -75,6 +75,58 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
     }
   });
 
+  const updateCallSessionMutation = useMutation({
+    mutationFn: async ({ callSessionId, comments }: { callSessionId: string; comments: string }) => {
+      console.log('Updating call session SMS content:', callSessionId, 'with comments:', comments);
+      
+      // First, check if SMS record exists for this call session
+      const { data: existingSms, error: selectError } = await supabase
+        .from('call_session_sms')
+        .select('*')
+        .eq('call_session_id', callSessionId)
+        .maybeSingle();
+      
+      if (selectError) {
+        console.error('Error checking existing SMS:', selectError);
+        throw selectError;
+      }
+
+      if (existingSms) {
+        // Update existing SMS record
+        const { data, error } = await supabase
+          .from('call_session_sms')
+          .update({
+            sms_content: comments,
+            updated_at: new Date().toISOString()
+          })
+          .eq('call_session_id', callSessionId)
+          .select();
+        
+        if (error) throw error;
+        return data;
+      } else {
+        // Create new SMS record
+        const { data, error } = await supabase
+          .from('call_session_sms')
+          .insert({
+            call_session_id: callSessionId,
+            sms_content: comments
+          })
+          .select();
+        
+        if (error) throw error;
+        return data;
+      }
+    },
+    onSuccess: () => {
+      console.log('Call session SMS updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['call-sessions'] });
+    },
+    onError: (error) => {
+      console.error('Error updating call session SMS:', error);
+    }
+  });
+
   // Filter contacts by selected call session
   const sessionContacts = selectedCallSessionId 
     ? contacts.filter(contact => contact.call_session_id === selectedCallSessionId)
@@ -119,10 +171,22 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
   const handleCommentsChange = (contactId: string, comments: string) => {
     console.log('Comments changed for contact:', contactId, 'comments:', comments);
     
+    // Find the contact to get the call session ID
+    const contact = contacts.find(c => c.id === contactId);
+    
+    // Update the contact record
     updateContactMutation.mutate({
       contactId: contactId,
       updates: { comments }
     });
+
+    // Also update the call session SMS content if the contact has a call session
+    if (contact?.call_session_id) {
+      updateCallSessionMutation.mutate({
+        callSessionId: contact.call_session_id,
+        comments: comments
+      });
+    }
   };
 
   return (
