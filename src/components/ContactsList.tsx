@@ -28,13 +28,22 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
     mutationFn: async ({ contactId, updates }: { contactId: string; updates: Partial<Contact> }) => {
       console.log('Updating contact:', contactId, 'with updates:', updates);
       
+      // Map frontend fields to database fields
+      const dbUpdates: any = {
+        updated_at: new Date().toISOString()
+      };
+      
+      if (updates.attending !== undefined) {
+        dbUpdates.attending = updates.attending;
+      }
+      
+      if (updates.comments !== undefined) {
+        dbUpdates.comments = updates.comments;
+      }
+      
       const { error } = await supabase
         .from('contacts')
-        .update({
-          attending: updates.attending,
-          comments: updates.comments,
-          updated_at: new Date().toISOString()
-        })
+        .update(dbUpdates)
         .eq('id', contactId);
       
       if (error) {
