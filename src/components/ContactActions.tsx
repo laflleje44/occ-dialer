@@ -8,18 +8,12 @@ interface ContactActionsProps {
   contact: Contact;
   onCall: (contact: Contact) => void;
   onStatusUpdate?: (status: CallStatus) => void;
-  onScrollToStatusBar?: () => void;
 }
 
-const ContactActions = ({ contact, onCall, onStatusUpdate, onScrollToStatusBar }: ContactActionsProps) => {
+const ContactActions = ({ contact, onCall, onStatusUpdate }: ContactActionsProps) => {
   return (
     <div className="flex space-x-2">
-      <CallButton 
-        contact={contact} 
-        onCall={onCall} 
-        onStatusUpdate={onStatusUpdate}
-        onScrollToStatusBar={onScrollToStatusBar}
-      />
+      <CallButton contact={contact} onCall={onCall} onStatusUpdate={onStatusUpdate} />
       <TextButton contact={contact} />
     </div>
   );

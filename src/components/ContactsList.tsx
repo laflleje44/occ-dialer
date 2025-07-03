@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Contact, CallSession } from "@/types/auth";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -24,7 +25,6 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
   const [callStatuses, setCallStatuses] = useState<CallStatus[]>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const callStatusBarRef = useRef<HTMLDivElement>(null);
 
   const updateContactMutation = useMutation({
     mutationFn: async ({ contactId, updates }: { contactId: string; updates: Partial<Contact> }) => {
@@ -156,18 +156,6 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
   const handleCall = (contact: Contact) => {
     // This is now just for logging purposes since the actual call is handled in ContactRow
     console.log(`Call logged for: ${contact.phone} - ${contact.firstName} ${contact.lastName}`);
-    
-    // Scroll to the status bar when a call is initiated
-    scrollToStatusBar();
-  };
-
-  const scrollToStatusBar = () => {
-    if (callStatusBarRef.current) {
-      callStatusBarRef.current.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
   };
 
   const handleStatusUpdate = (status: CallStatus) => {
@@ -221,6 +209,12 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
 
   return (
     <div className="max-w-6xl mx-auto">
+      {/* Call Status Bar - show above Telephone Settings */}
+      <CallStatusBar 
+        callStatuses={callStatuses}
+        onClearStatus={handleClearStatus}
+      />
+
       {/* Caller ID Settings - show at the top of dialer tab */}
       <CallerNumberSettings />
 
@@ -240,21 +234,12 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
             onSearchChange={setSearchTerm}
           />
 
-          {/* Call Status Bar - moved above the contact list */}
-          <div ref={callStatusBarRef}>
-            <CallStatusBar 
-              callStatuses={callStatuses}
-              onClearStatus={handleClearStatus}
-            />
-          </div>
-
           <ContactsTable
             contacts={filteredContacts}
             onCall={handleCall}
             onAttendingChange={handleAttendingChange}
             onCommentsChange={handleCommentsChange}
             onStatusUpdate={handleStatusUpdate}
-            onScrollToStatusBar={scrollToStatusBar}
           />
 
           {filteredContacts.length === 0 && searchTerm && (
