@@ -2,17 +2,19 @@
 import { Contact } from "@/types/auth";
 import CallButton from "./CallButton";
 import TextButton from "./TextButton";
+import { CallStatus } from "./CallStatusBar";
 
 interface ContactActionsProps {
   contact: Contact;
   onCall: (contact: Contact) => void;
+  onStatusUpdate?: (status: CallStatus) => void;
 }
 
-const ContactActions = ({ contact, onCall }: ContactActionsProps) => {
+const ContactActions = ({ contact, onCall, onStatusUpdate }: ContactActionsProps) => {
   return (
-    <div className="flex gap-2 justify-end">
+    <div className="flex space-x-2">
+      <CallButton contact={contact} onCall={onCall} onStatusUpdate={onStatusUpdate} />
       <TextButton contact={contact} />
-      <CallButton contact={contact} onCall={onCall} />
     </div>
   );
 };

@@ -3,12 +3,14 @@ import { Contact } from "@/types/auth";
 import { maskLastName, maskPhoneNumber } from "@/utils/contactUtils";
 import ContactActions from "./ContactActions";
 import ContactAttendance from "./ContactAttendance";
+import { CallStatus } from "./CallStatusBar";
 
 interface ContactRowProps {
   contact: Contact;
   onCall: (contact: Contact) => void;
   onAttendingChange: (contactId: string, checked: boolean | string) => void;
   onCommentsChange: (contactId: string, comments: string) => void;
+  onStatusUpdate?: (status: CallStatus) => void;
 }
 
 const getStatusDisplay = (status?: string) => {
@@ -41,7 +43,7 @@ const formatLastCalled = (lastCalled?: string) => {
   return date.toLocaleDateString();
 };
 
-const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: ContactRowProps) => {
+const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange, onStatusUpdate }: ContactRowProps) => {
   const statusDisplay = getStatusDisplay(contact.status);
 
   return (
@@ -97,7 +99,7 @@ const ContactRow = ({ contact, onCall, onAttendingChange, onCommentsChange }: Co
       
       {/* Actions column */}
       <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-right">
-        <ContactActions contact={contact} onCall={onCall} />
+        <ContactActions contact={contact} onCall={onCall} onStatusUpdate={onStatusUpdate} />
       </td>
     </tr>
   );
