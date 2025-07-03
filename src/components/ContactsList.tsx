@@ -209,12 +209,6 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Call Status Bar - show above Telephone Settings */}
-      <CallStatusBar 
-        callStatuses={callStatuses}
-        onClearStatus={handleClearStatus}
-      />
-
       {/* Caller ID Settings - show at the top of dialer tab */}
       <CallerNumberSettings />
 
@@ -232,6 +226,12 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
           <ContactsListHeader 
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
+          />
+
+          {/* Call Status Bar - moved above the contact list */}
+          <CallStatusBar 
+            callStatuses={callStatuses}
+            onClearStatus={handleClearStatus}
           />
 
           <ContactsTable
