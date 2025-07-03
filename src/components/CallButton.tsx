@@ -5,7 +5,7 @@ import { Contact } from "@/types/auth";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ringCentralService } from "@/services/ringCentralService";
-import { useContactMutations } from "@/hooks/useContactMutations";
+import { useContactListMutations } from "@/hooks/useContactListMutations";
 
 interface CallButtonProps {
   contact: Contact;
@@ -23,7 +23,7 @@ interface CallButtonProps {
 
 const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
   const [isCallLoading, setIsCallLoading] = useState(false);
-  const { updateContactStatusMutation } = useContactMutations();
+  const { updateContactMutation } = useContactListMutations();
 
   const handleCall = async () => {
     setIsCallLoading(true);
@@ -140,10 +140,10 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
         }, 2000);
       }, 3000);
       
-      // Update status to "called" on successful call
-      await updateContactStatusMutation.mutateAsync({
+      // Update status to "called" on successful call - using the new mutation hook
+      await updateContactMutation.mutateAsync({
         contactId: contact.id,
-        status: "called"
+        updates: { status: "called" }
       });
       
       onCall(contact);
@@ -171,10 +171,10 @@ const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
         step: `Failed to call ${contact.firstName} ${contact.lastName}: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
       
-      // Update status to "call failed" on error
-      await updateContactStatusMutation.mutateAsync({
+      // Update status to "call failed" on error - using the new mutation hook
+      await updateContactMutation.mutateAsync({
         contactId: contact.id,
-        status: "call failed"
+        updates: { status: "call failed" }
       });
     } finally {
       setIsCallLoading(false);

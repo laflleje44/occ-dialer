@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ringCentralService } from "@/services/ringCentralService";
-import { useContactMutations } from "@/hooks/useContactMutations";
+import { useContactListMutations } from "@/hooks/useContactListMutations";
 import { useContactSMS } from "@/hooks/useContactSMS";
 
 interface TextButtonProps {
@@ -16,7 +16,7 @@ interface TextButtonProps {
 const TextButton = ({ contact }: TextButtonProps) => {
   const [isTextLoading, setIsTextLoading] = useState(false);
   const { toast } = useToast();
-  const { updateContactStatusMutation } = useContactMutations();
+  const { updateContactMutation } = useContactListMutations();
   const { smsContent } = useContactSMS(contact.call_session_id);
 
   const handleText = async () => {
@@ -48,10 +48,10 @@ const TextButton = ({ contact }: TextButtonProps) => {
       // Use RingCentral service to send SMS with config
       await ringCentralService.sendSMS(contact.phone, message, config);
       
-      // Update status to "text sent" on successful SMS
-      await updateContactStatusMutation.mutateAsync({
+      // Update status to "text sent" on successful SMS - using the new mutation hook
+      await updateContactMutation.mutateAsync({
         contactId: contact.id,
-        status: "text sent"
+        updates: { status: "text sent" }
       });
       
       toast({
@@ -63,10 +63,10 @@ const TextButton = ({ contact }: TextButtonProps) => {
     } catch (error) {
       console.error('Text failed:', error);
       
-      // Update status to "call failed" (we can use same status for SMS failures)
-      await updateContactStatusMutation.mutateAsync({
+      // Update status to "call failed" (we can use same status for SMS failures) - using the new mutation hook
+      await updateContactMutation.mutateAsync({
         contactId: contact.id,
-        status: "call failed"
+        updates: { status: "call failed" }
       });
       
       // Check if it's the specific "phone number doesn't belong to extension" error
