@@ -149,7 +149,12 @@ const ContactsList = ({ contacts, callSessions }: ContactsListProps) => {
 
     return matchesSearch && matchesFilter;
   }).sort((a, b) => {
-    // Sort by first name first, then by last name
+    // First sort by call_initiated (ascending: false comes before true)
+    if (a.call_initiated !== b.call_initiated) {
+      return a.call_initiated ? 1 : -1;
+    }
+    
+    // Then sort by first name, then by last name
     const firstNameComparison = a.firstName.localeCompare(b.firstName);
     if (firstNameComparison !== 0) {
       return firstNameComparison;
