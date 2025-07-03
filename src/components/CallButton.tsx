@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ringCentralService } from "@/services/ringCentralService";
 import { useContactMutations } from "@/hooks/useContactMutations";
+import { maskPhoneNumber } from "@/utils/contactUtils";
 
 interface CallButtonProps {
   contact: Contact;
@@ -48,7 +49,7 @@ const CallButton = ({ contact, onCall }: CallButtonProps) => {
       
       toast({
         title: "Call initiated",
-        description: `Calling ${contact.firstName} ${contact.lastName} at ${contact.phone}`
+        description: `Calling ${contact.firstName} ${contact.lastName} at ${maskPhoneNumber(contact.phone)}`
       });
     } catch (error) {
       console.error('Call failed:', error);
