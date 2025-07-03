@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Contact } from "@/types/auth";
 import { TableRow, TableCell } from "@/components/ui/table";
@@ -49,6 +50,7 @@ const ContactRow = ({
         <ContactAttendance 
           contact={contact}
           onAttendingChange={onAttendingChange}
+          onCommentsChange={onCommentsChange}
         />
       </TableCell>
       <TableCell>

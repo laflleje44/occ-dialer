@@ -1,6 +1,8 @@
+
 import { Contact } from "@/types/auth";
 import ContactRow from "./ContactRow";
 import { CallStatus } from "./CallStatusBar";
+import { Table, TableHeader, TableBody, TableRow, TableHead } from "@/components/ui/table";
 
 interface ContactsTableProps {
   contacts: Contact[];
