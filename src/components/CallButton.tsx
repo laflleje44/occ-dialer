@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
 import { Contact } from "@/types/auth";
@@ -18,15 +17,19 @@ interface CallButtonProps {
     progress: number;
     timestamp: Date;
   }) => void;
+  onScrollToStatusBar?: () => void;
 }
 
-const CallButton = ({ contact, onCall, onStatusUpdate }: CallButtonProps) => {
+const CallButton = ({ contact, onCall, onStatusUpdate, onScrollToStatusBar }: CallButtonProps) => {
   const [isCallLoading, setIsCallLoading] = useState(false);
   const { updateContactStatusMutation } = useContactMutations();
 
   const handleCall = async () => {
     setIsCallLoading(true);
     const callId = `call-${contact.id}-${Date.now()}`;
+    
+    // Scroll to status bar immediately when call is initiated
+    onScrollToStatusBar?.();
     
     try {
       // Step 1: Initiating call
