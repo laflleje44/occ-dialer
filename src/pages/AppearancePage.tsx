@@ -20,7 +20,7 @@ const AppearancePage = () => {
     {
       id: 'dark',
       name: 'OCC Basic',
-      description: 'Basic'
+      description: 'Basic theme but with OCC logos and color way'
     },
     {
       id: 'compact',
