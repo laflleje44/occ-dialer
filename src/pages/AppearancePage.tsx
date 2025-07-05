@@ -16,7 +16,7 @@ const AppearancePage = () => {
       id: 'basic',
       name: 'Basic',
       description: 'Clean and simple interface',
-      screenshot: '/lovable-uploads/0aaa1957-d77f-42be-a83b-26346c551be8.png'
+      screenshot: '/lovable-uploads/7c5808a3-757b-4ee9-a9ca-87848499b109.png'
     },
     {
       id: 'dark',
