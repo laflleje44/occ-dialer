@@ -141,7 +141,7 @@ const UserAccountDialog = ({ open, onOpenChange, user }: UserAccountDialogProps)
           description: "Please check both your old and new email addresses to confirm the change."
         });
       } else {
-        // Update phone in profiles table (we'll need to add this field to the database)
+        // Update phone in profiles table
         const { error } = await supabase
           .from('profiles')
           .update({ phone: newValue })
@@ -213,7 +213,7 @@ const UserAccountDialog = ({ open, onOpenChange, user }: UserAccountDialogProps)
                 </Button>
               </div>
               <p className="text-sm text-gray-900 bg-gray-50 p-2 rounded">
-                Not available
+                {user.phone || 'Not provided'}
               </p>
             </div>
             
