@@ -297,13 +297,16 @@ const UserAccountDialog = ({ open, onOpenChange, user, onUserUpdate }: UserAccou
               Edit {editField === 'phone' ? 'Phone Number' : 'Email'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Enter your new {editField === 'phone' ? 'phone number' : 'email address'}.
+              {editField === 'phone' 
+                ? 'Enter your new phone number in format +1234567890.' 
+                : 'Enter your new email address.'
+              }
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">
             <Input
               type={editField === 'email' ? 'email' : 'tel'}
-              placeholder={editField === 'phone' ? 'Enter phone number' : 'Enter email address'}
+              placeholder={editField === 'phone' ? '+1234567890' : 'Enter email address'}
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
               onKeyDown={(e) => {
