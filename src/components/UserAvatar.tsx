@@ -14,7 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import UserAccountDialog from './UserAccountDialog';
 
 const UserAvatar = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshUser } = useAuth();
   const [showAccountDialog, setShowAccountDialog] = useState(false);
 
   if (!user) return null;
@@ -27,6 +27,12 @@ const UserAvatar = () => {
 
   const handleSignOut = async () => {
     await signOut();
+  };
+
+  const handleUserUpdate = async () => {
+    // Refresh user data from the database to show changes immediately
+    await refreshUser();
+    console.log('User data refreshed');
   };
 
   return (
@@ -62,6 +68,7 @@ const UserAvatar = () => {
         open={showAccountDialog} 
         onOpenChange={setShowAccountDialog}
         user={user}
+        onUserUpdate={handleUserUpdate}
       />
     </>
   );

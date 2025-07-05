@@ -21,15 +21,16 @@ import { Input } from '@/components/ui/input';
 import { User } from '@/types/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { KeyRound, Edit } from 'lucide-react';
+import { KeyRound, Edit, Save } from 'lucide-react';
 
 interface UserAccountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: User;
+  onUserUpdate?: () => void;
 }
 
-const UserAccountDialog = ({ open, onOpenChange, user }: UserAccountDialogProps) => {
+const UserAccountDialog = ({ open, onOpenChange, user, onUserUpdate }: UserAccountDialogProps) => {
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -70,7 +71,7 @@ const UserAccountDialog = ({ open, onOpenChange, user }: UserAccountDialogProps)
   const handleEditClick = (field: 'phone' | 'email') => {
     setEditField(field);
     setPassword('');
-    setNewValue('');
+    setNewValue(field === 'phone' ? (user.phone || '') : user.email);
     setShowPasswordPrompt(true);
   };
 
@@ -153,6 +154,11 @@ const UserAccountDialog = ({ open, onOpenChange, user }: UserAccountDialogProps)
           title: "Phone number updated",
           description: "Your phone number has been successfully updated."
         });
+
+        // Trigger user data refresh if callback is provided
+        if (onUserUpdate) {
+          onUserUpdate();
+        }
       }
       
       setShowEditDialog(false);
@@ -313,7 +319,8 @@ const UserAccountDialog = ({ open, onOpenChange, user }: UserAccountDialogProps)
               onClick={handleUpdateField}
               disabled={isUpdating}
             >
-              {isUpdating ? 'Updating...' : 'Update'}
+              <Save className="w-4 h-4 mr-2" />
+              {isUpdating ? 'Saving...' : 'Save'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
