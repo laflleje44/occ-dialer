@@ -13,95 +13,163 @@ const AppearancePage = () => {
 
   // Create a mock screenshot component for the Basic theme
   const BasicThemePreview = () => (
-    <div className="w-full h-full bg-gray-50 text-xs">
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
-                </th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Attending
-                </th>
-                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              <tr>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">User {maskLastName('Smith')}</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs text-gray-500">{maskPhoneNumber('+1234567890')}</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs text-gray-500">user@email.com</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+    <div className="w-full h-full bg-gray-50 text-xs overflow-hidden">
+      {/* Header Section */}
+      <div className="bg-white shadow-sm border-b mb-3">
+        <div className="px-3 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 bg-green-500 rounded flex items-center justify-center">
+                <div className="w-2 h-2 text-white text-xs">📞</div>
+              </div>
+              <div>
+                <h1 className="text-sm font-semibold text-gray-900">OCC Secure Dialer</h1>
+                <p className="text-xs text-gray-600">Privacy-focused calling solution</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
+                <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+                <span className="text-xs text-gray-600">System Ready</span>
+              </div>
+              <span className="text-xs text-gray-600">Welcome, User</span>
+              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                <span className="text-xs text-white font-medium">U</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <nav className="border-b">
+          <div className="flex">
+            <button className="flex items-center space-x-1 px-3 py-2 border-b-2 border-green-500 text-green-600 bg-green-50">
+              <span className="text-xs">👥</span>
+              <span className="text-xs">Dialer</span>
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      {/* Telephone Settings Section */}
+      <div className="px-3 mb-3">
+        <div className="bg-white rounded border shadow-sm">
+          <div className="px-3 py-2 border-b">
+            <h3 className="text-xs font-semibold flex items-center space-x-1">
+              <span>📞</span>
+              <span>Telephone Settings</span>
+            </h3>
+          </div>
+          <div className="px-3 py-2">
+            <div className="space-y-1">
+              <label className="text-xs text-gray-700">Your Number</label>
+              <div className="flex space-x-1">
+                <input 
+                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                  value="+1234567890"
+                  readOnly
+                />
+                <button className="bg-black text-white px-2 py-1 rounded text-xs">
+                  Save
+                </button>
+              </div>
+              <p className="text-xs text-gray-600">
+                This number you will receive the outgoing calls. Format: +1234567890
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Contacts Table Section */}
+      <div className="px-3">
+        <div className="bg-white rounded shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contact
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Phone
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Attending
-                  </span>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <button className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">
-                    Call
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">User {maskLastName('Johnson')}</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs text-gray-500">{maskPhoneNumber('+1987654321')}</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs text-gray-500">user2@email.com</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                    Maybe
-                  </span>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <button className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">
-                    Call
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs font-medium text-gray-900">User {maskLastName('Williams')}</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs text-gray-500">{maskPhoneNumber('+1555123456')}</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <div className="text-xs text-gray-500">user3@email.com</div>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                    Not Attending
-                  </span>
-                </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <button className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">
-                    Call
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs font-medium text-gray-900">User {maskLastName('Smith')}</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs text-gray-500">{maskPhoneNumber('+1234567890')}</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs text-gray-500">user@email.com</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                      Attending
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <button className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">
+                      Call
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs font-medium text-gray-900">User {maskLastName('Johnson')}</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs text-gray-500">{maskPhoneNumber('+1987654321')}</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs text-gray-500">user2@email.com</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                      Maybe
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <button className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">
+                      Call
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs font-medium text-gray-900">User {maskLastName('Williams')}</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs text-gray-500">{maskPhoneNumber('+1555123456')}</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <div className="text-xs text-gray-500">user3@email.com</div>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                      Not Attending
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <button className="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">
+                      Call
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
