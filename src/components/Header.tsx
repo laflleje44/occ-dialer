@@ -1,4 +1,3 @@
-
 import { Phone, Upload, Users, FileText, LogOut, MessageSquare, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import UserAvatar from "./UserAvatar";
 
 interface HeaderProps {
   activeTab: string;
@@ -74,10 +74,7 @@ const Header = ({ activeTab, setActiveTab, isAdmin = false }: HeaderProps) => {
                 Admin
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Sign Out</span>
-            </Button>
+            <UserAvatar />
           </div>
         </div>
         
