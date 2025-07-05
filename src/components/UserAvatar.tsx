@@ -11,10 +11,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import UserAccountDialog from './UserAccountDialog';
 
 const UserAvatar = () => {
   const { user, signOut, refreshUser } = useAuth();
+  const navigate = useNavigate();
   const [showAccountDialog, setShowAccountDialog] = useState(false);
 
   if (!user) return null;
@@ -35,6 +37,10 @@ const UserAvatar = () => {
     console.log('User data refreshed');
   };
 
+  const handleAppearanceClick = () => {
+    navigate('/appearance');
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -52,7 +58,7 @@ const UserAvatar = () => {
             <User className="mr-2 h-4 w-4" />
             My Account
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleAppearanceClick}>
             <Settings className="mr-2 h-4 w-4" />
             Appearance
           </DropdownMenuItem>
