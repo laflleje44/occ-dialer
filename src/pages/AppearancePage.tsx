@@ -6,17 +6,53 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
+import { maskLastName, maskPhoneNumber } from '@/utils/contactUtils';
 
 const AppearancePage = () => {
   const navigate = useNavigate();
   const [selectedTheme, setSelectedTheme] = useState('basic');
+
+  // Create a mock screenshot component for the Basic theme
+  const BasicThemePreview = () => (
+    <div className="w-full h-full bg-white p-4 text-xs">
+      <div className="border rounded-lg overflow-hidden">
+        <div className="bg-gray-50 p-2 border-b font-medium">
+          Contacts List
+        </div>
+        <div className="divide-y">
+          <div className="p-2 flex justify-between items-center">
+            <div>
+              <div className="font-medium">User {maskLastName('Smith')}</div>
+              <div className="text-gray-500">{maskPhoneNumber('+1234567890')}</div>
+            </div>
+            <div className="text-green-600 text-xs">Attending</div>
+          </div>
+          <div className="p-2 flex justify-between items-center">
+            <div>
+              <div className="font-medium">User {maskLastName('Johnson')}</div>
+              <div className="text-gray-500">{maskPhoneNumber('+1987654321')}</div>
+            </div>
+            <div className="text-yellow-600 text-xs">Maybe</div>
+          </div>
+          <div className="p-2 flex justify-between items-center">
+            <div>
+              <div className="font-medium">User {maskLastName('Williams')}</div>
+              <div className="text-gray-500">{maskPhoneNumber('+1555123456')}</div>
+            </div>
+            <div className="text-red-600 text-xs">Not Attending</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const themes = [
     {
       id: 'basic',
       name: 'Basic',
       description: 'Clean and simple interface',
-      screenshot: '/lovable-uploads/7c5808a3-757b-4ee9-a9ca-87848499b109.png'
+      screenshot: null, // We'll use the component instead
+      component: BasicThemePreview
     },
     {
       id: 'dark',
@@ -82,15 +118,19 @@ const AppearancePage = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden border">
-                      <img 
-                        src={theme.screenshot} 
-                        alt={`${theme.name} theme preview`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder.svg';
-                        }}
-                      />
+                      {theme.component ? (
+                        <theme.component />
+                      ) : (
+                        <img 
+                          src={theme.screenshot} 
+                          alt={`${theme.name} theme preview`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg';
+                          }}
+                        />
+                      )}
                     </div>
                   </CardContent>
                 </Card>
