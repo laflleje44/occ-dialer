@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: data.email || '',
           first_name: data.first_name,
           last_name: data.last_name,
+          phone: data.phone,
           role: data.role as 'user' | 'admin'
         });
       } else {
@@ -47,6 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             email: session.user.email || '',
             first_name: session.user.user_metadata?.first_name || null,
             last_name: session.user.user_metadata?.last_name || null,
+            phone: null,
             role: 'user' as const
           };
           
@@ -72,6 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           email: session.user.email || '',
           first_name: session.user.user_metadata?.first_name,
           last_name: session.user.user_metadata?.last_name,
+          phone: null,
           role: 'user'
         });
       }
