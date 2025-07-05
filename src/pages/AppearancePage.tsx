@@ -15,27 +15,22 @@ const AppearancePage = () => {
     {
       id: 'basic',
       name: 'Basic',
-      description: 'Clean and simple interface',
-      screenshot: null,
-      component: null
+      description: 'Clean and simple interface'
     },
     {
       id: 'dark',
       name: 'Dark',
-      description: 'Dark theme for low-light environments',
-      screenshot: '/placeholder.svg'
+      description: 'Dark theme for low-light environments'
     },
     {
       id: 'compact',
       name: 'Compact',
-      description: 'Space-efficient layout',
-      screenshot: '/placeholder.svg'
+      description: 'Space-efficient layout'
     },
     {
       id: 'colorful',
       name: 'Colorful',
-      description: 'Vibrant and modern design',
-      screenshot: '/placeholder.svg'
+      description: 'Vibrant and modern design'
     }
   ];
 
@@ -69,37 +64,20 @@ const AppearancePage = () => {
           </p>
 
           <RadioGroup value={selectedTheme} onValueChange={handleThemeSelect}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
               {themes.map((theme) => (
-                <Card key={theme.id} className="cursor-pointer hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-3">
+                <Card key={theme.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                  <CardContent className="p-4">
                     <div className="flex items-center space-x-3">
                       <RadioGroupItem value={theme.id} id={theme.id} />
-                      <Label htmlFor={theme.id} className="cursor-pointer">
-                        <CardTitle className="text-lg">{theme.name}</CardTitle>
+                      <Label htmlFor={theme.id} className="cursor-pointer flex-1">
+                        <div>
+                          <div className="font-medium text-lg">{theme.name}</div>
+                          <div className="text-sm text-muted-foreground">{theme.description}</div>
+                        </div>
                       </Label>
                     </div>
-                    <CardDescription>{theme.description}</CardDescription>
-                  </CardHeader>
-                  {(theme.component || theme.screenshot) && (
-                    <CardContent>
-                      <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden border">
-                        {theme.component ? (
-                          <theme.component />
-                        ) : (
-                          <img 
-                            src={theme.screenshot} 
-                            alt={`${theme.name} theme preview`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/placeholder.svg';
-                            }}
-                          />
-                        )}
-                      </div>
-                    </CardContent>
-                  )}
+                  </CardContent>
                 </Card>
               ))}
             </div>
